@@ -41,7 +41,7 @@ class Router:
             if method == environ['REQUEST_METHOD']:
                 match, args = match_pattern(path, environ['PATH_INFO'])
                 if match:
-                    environ['wsgi_tools.args'] = args
+                    environ['wsgi_tools.routing.args'] = args
                     return self.routes[(method, path)](environ, start_response)
 
         return self.not_found(environ, start_response)
