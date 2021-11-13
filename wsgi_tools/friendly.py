@@ -1,22 +1,28 @@
 from functools import cached_property
-from json import dumps, loads
-from json.decoder import JSONDecodeError
+from json import dumps, loads, JSONDecodeError
 
 from wsgi_tools.error import HTTPException
 
 from .utils import get_status_code_string
+
 
 class Request:
     def __init__(self, environ):
         self.environ = environ
         self.method = environ['REQUEST_METHOD']
         self.path = environ['PATH_INFO']
-        self.content_length = int(environ.get('CONTENT_LENGTH') or 0)
-        self.routing_args = environ.get('wsgi_tools.routing.args', [])
-        self.scheme = environ['wsgi.url_scheme']
+        self.protocol = environ['SERVER_PROTOCOL']
         self.query_string = environ.get('QUERY_STRING', '')
+        self.routing_args = environ.get('wsgi_tools.routing.args', [])
         self.content_type = environ.get('CONTENT_TYPE', 'text/plain')
+        self.content_length = int(environ.get('CONTENT_LENGTH') or 0)
+        self.scheme = environ['wsgi.url_scheme']
         self.body_stream = environ['wsgi.input']
+        self.server = (environ['SERVER_NAME'], environ['SERVER_PORT'])
+        self.headers = {}
+        for key, value in environ.items():
+            if key.startswith('HTTP_'):
+                self.headers[key[5:].replace('_', '-')] = value
 
     @cached_property
     def body_bytes(self):
@@ -34,10 +40,8 @@ class Request:
             except JSONDecodeError:
                 raise HTTPException(400, 'Invalid JSON')
         else:
-            raise HTTPException(415, 'Content-Type must be a json type (e.g. \'application/json\').')
-
-    def get_header(self, name):
-        return self.environ.get('HTTP_' + name.upper().replace('-', '_'))
+            raise HTTPException(
+                415, 'Content-Type must be a json type (e.g. \'application/json\').')
 
 
 class Response:
