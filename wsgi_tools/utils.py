@@ -61,3 +61,10 @@ status_codes = {
     510: 'Not Extended',
     511: 'Network Authentication Required',
 }
+
+
+def get_status_code_string(code):
+    if code in status_codes:
+        return '%s %s' % (code, status_codes[code])
+    else:
+        return code

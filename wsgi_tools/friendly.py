@@ -1,8 +1,7 @@
 from functools import cached_property
 from json import dumps, loads
 
-from .utils import status_codes
-
+from .utils import get_status_code_string
 
 class Request:
     def __init__(self, environ):
@@ -71,8 +70,7 @@ class FriendlyWSGI:
         elif len(response) == 3:
             status, body, headers = response
 
-        if status in status_codes:
-            status = '%s %s' % (status, status_codes[status])
+        status = get_status_code_string(status)
 
         if isinstance(headers, dict):
             headers = [header for header in headers.items()]
