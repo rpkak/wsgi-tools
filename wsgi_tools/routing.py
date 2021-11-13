@@ -1,3 +1,6 @@
+from wsgi_tools.error import HTTPException
+
+
 def match_pattern(pattern, test):
     args = []
     string = True
@@ -32,9 +35,8 @@ def match_pattern(pattern, test):
 
 
 class Router:
-    def __init__(self, routes, not_found):
+    def __init__(self, routes):
         self.routes = routes
-        self.not_found = not_found
 
     def __call__(self, environ, start_response):
         for method, path in self.routes:
@@ -44,4 +46,4 @@ class Router:
                     environ['wsgi_tools.routing.args'] = args
                     return self.routes[(method, path)](environ, start_response)
 
-        return self.not_found(environ, start_response)
+        raise HTTPException(404)

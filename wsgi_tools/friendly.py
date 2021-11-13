@@ -1,5 +1,8 @@
 from functools import cached_property
 from json import dumps, loads
+from json.decoder import JSONDecodeError
+
+from wsgi_tools.error import HTTPException
 
 from .utils import get_status_code_string
 
@@ -26,9 +29,12 @@ class Request:
     @cached_property
     def body_json(self):
         if len(self.content_type.split('/')) == 1 or 'json' in self.content_type.split('/')[1].split('+'):
-            return loads(self.body_bytes)
+            try:
+                return loads(self.body_bytes)
+            except JSONDecodeError:
+                raise HTTPException(400, 'Invalid JSON')
         else:
-            raise ValueError('Content-Type is not JSON')
+            raise HTTPException(415, 'Content-Type must be a json type (e.g. \'application/json\').')
 
     def get_header(self, name):
         return self.environ.get('HTTP_' + name.upper().replace('-', '_'))
