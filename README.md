@@ -4,6 +4,8 @@ A collection of WSGI packages
 
 ## Usage
 
+See: example.py
+
 ### ErrorHandler
 
 The error handler is a WSGI app which calls another WSGI app.
@@ -47,15 +49,36 @@ from wsgi_tools.routing import Router
 
 Create the Router:
 
+The first argument of `Router` is the `list` of rules you want to use.
+
+A rule an instance of an subclass of `wsgi_tools.routing.Rule`.
+
+The order of these rules is important, because you don't want to throw an `405 Method Not Allowed` error if there are no endpoints which match one of the endpoint and the method.
+
+So the path-checking rule must be before the method checking rule.
+
+There are premade rules for matching path, method and content-type:
+
 ```python
+from wsgi_tools.routing import PathRule, METHOD_RULE, CONTENT_TYPE_RULE
+```
+
+The second argument is the `dict` with tuples as keys, which represent the args for the rules and wsgi apps as keys.
+
+```python
+from wsgi_tools.routing import Router, PathRule, METHOD_RULE, CONTENT_TYPE_RULE
+
+path_rule = PathRule()
+
 app = Router(
+    [path_rule, METHOD_RULE, CONTENT_TYPE_RULE],
     {
-        ('POST', ('/create')): app0,
-        ('GET', ('/', int, '/options')): app1
+        (('/create',), 'POST', 'json'): create_app,
+        (('/', int, '/options'), 'GET', None): options_app
     }
 )
 ```
 
-If you send a `POST` request to `/create`, `app0` will be called.
+If you send a `POST` request to `/create` and the content-type is `*/json`, `*/*+json`, `*/json+*` or `*/*+json+*`, `create_app` will be called.
 
-If you send a `GET` request to `/3/options`, `app1` will be called and `environ['wsgi_tools.routing.args']` will be `[3]`. If you are using `wsgi_tools.friendly`, `request.routing_args` will be `[3]`.
+If you send a `GET` request to `/3/options`, `options_app` will be called and `path_rule.args` will be `[3]`.

@@ -13,8 +13,7 @@ class Request:
         self.path = environ['PATH_INFO']
         self.protocol = environ['SERVER_PROTOCOL']
         self.query_string = environ.get('QUERY_STRING', '')
-        self.routing_args = environ.get('wsgi_tools.routing.args', [])
-        self.content_type = environ.get('CONTENT_TYPE', 'text/plain')
+        self.content_type = environ.get('CONTENT_TYPE')
         self.content_length = int(environ.get('CONTENT_LENGTH') or 0)
         self.scheme = environ['wsgi.url_scheme']
         self.body_stream = environ['wsgi.input']

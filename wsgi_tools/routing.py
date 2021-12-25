@@ -1,49 +1,102 @@
+from abc import ABCMeta, abstractmethod
+
 from wsgi_tools.error import HTTPException
 
 
-def match_pattern(pattern, test):
-    args = []
-    string = True
-    for i in range(len(pattern)):
-        if string:
-            if test[:len(pattern[i])] == pattern[i]:
-                test = test[len(pattern[i]):]
-            else:
-                return False, []
-        else:
-            if i+1 == len(pattern):
-                content = test
-                test = ''
-            else:
-                content_end = test.find(pattern[i+1])
-                if content_end == -1:
-                    return False, []
+class Rule(metaclass=ABCMeta):
+    @abstractmethod
+    def get_exception(self):
+        pass
+
+    @abstractmethod
+    def check(self, environ, value):
+        pass
+
+    def clear(self):
+        pass
+
+
+class PathRule(Rule):
+    def __init__(self):
+        self.args = []
+
+    def check(self, environ, value):
+        args = []
+        string = True
+        path = environ['PATH_INFO']
+        for i in range(len(value)):
+            if string:
+                if path[:len(value[i])] == value[i]:
+                    path = path[len(value[i]):]
                 else:
-                    content = test[:content_end]
-                    test = test[content_end:]
-            func = pattern[i]
-            try:
-                value = func(content)
-            except ValueError:
-                return False, []
-            args.append(value)
-        string = not string
-    if test != '':
-        return False, []
-    else:
-        return True, args
+                    return False
+            else:
+                if i+1 == len(value):
+                    content = path
+                    path = ''
+                else:
+                    content_end = path.find(value[i+1])
+                    if content_end == -1:
+                        return False
+                    else:
+                        content = path[:content_end]
+                        path = path[content_end:]
+                func = value[i]
+                try:
+                    arg = func(content)
+                except ValueError:
+                    return False
+                args.append(arg)
+            string = not string
+        if path != '':
+            return False
+        else:
+            self.args = args
+            return True
+
+    def get_exception(self):
+        return HTTPException(404, message='Path not found')
+
+
+class MethodRule(Rule):
+    def check(self, environ, value):
+        return value == environ['REQUEST_METHOD']
+
+    def get_exception(self):
+        return HTTPException(405)
+
+
+METHOD_RULE = MethodRule()
+
+
+class ContentTypeRule(Rule):
+    def check(self, environ, value):
+        if environ.get('CONTENT_TYPE') is None:
+            return value is None
+        elif value is None:
+            return False
+        if '/' in value:
+            return value == environ.get('CONTENT_TYPE', 'text/plain')
+        else:
+            return value in environ.get('CONTENT_TYPE', 'text/plain').split('/')[1].split('+')
+
+    def get_exception(self):
+        return HTTPException(415, message='Unsupported Content-Type')
+
+
+CONTENT_TYPE_RULE = ContentTypeRule()
 
 
 class Router:
-    def __init__(self, routes):
+    def __init__(self, rules, routes):
+        self.rules = rules
         self.routes = routes
 
     def __call__(self, environ, start_response):
-        for method, path in self.routes:
-            if method == environ['REQUEST_METHOD']:
-                match, args = match_pattern(path, environ['PATH_INFO'])
-                if match:
-                    environ['wsgi_tools.routing.args'] = args
-                    return self.routes[(method, path)](environ, start_response)
-
-        raise HTTPException(404)
+        routes = list(self.routes)
+        for i, rule in enumerate(self.rules):
+            routes = [route for route in routes if rule.check(
+                environ, route[i])]
+            if len(routes) == 0:
+                raise rule.get_exception()
+        return self.routes[routes[0]](environ, start_response)
