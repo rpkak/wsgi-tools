@@ -4,6 +4,8 @@ A collection of WSGI packages
 
 ## Usage
 
+See: example.py
+
 ### ErrorHandler
 
 The error handler is a WSGI app which calls another WSGI app.
