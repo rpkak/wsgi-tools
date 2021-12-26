@@ -1,3 +1,8 @@
+"""Utilities of the `wsgi_tools` package.
+
+Contains some general constants and functions.
+"""
+
 status_codes = {
     100: 'Continue',
     101: 'Switching Protocols',
@@ -61,9 +66,27 @@ status_codes = {
     510: 'Not Extended',
     511: 'Network Authentication Required',
 }
+"""dict: All HTTP status_codes
+
+The keys are the codes as ints and the values are the strings without numbers.
+"""
 
 
 def get_status_code_string(code):
+    """Returns the string of the status.
+
+    Args:
+        code (int | str): The int or string of this status_code
+
+    Returns:
+        str: The status_code as a string
+
+    Examples:
+        >>> get_status_code_string(404)
+        '404 Not Found'
+        >>> get_status_code_string('200 foo')
+        '200 foo'
+    """
     if code in status_codes:
         return '%s %s' % (code, status_codes[code])
     else:
