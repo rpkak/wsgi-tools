@@ -1,7 +1,7 @@
 from wsgi_tools.error import JSONErrorHandler
 from wsgi_tools.friendly import FriendlyWSGI, Request, Response
 from wsgi_tools.routing import CONTENT_TYPE_RULE, METHOD_RULE, PathRule, Router
-from wsgi_tools.parser import JSONParser
+from wsgi_tools.filtered_parser import FilteredJSONParser, Int, Object, String, Float, Options
 
 path_rule = PathRule()
 
@@ -25,7 +25,14 @@ def get_options(request: Request):
 create_app = FriendlyWSGI(create)
 options_app = FriendlyWSGI(get_options)
 
-create_app_parser = JSONParser(create_app)
+create_app_parser = FilteredJSONParser(create_app, Object(
+    {
+        # Either int or float bigger than 0
+        'id': Options(Int(min=0), Float(min=0)),
+        # the True in this tuple says, that this arg is optional
+        'description': (String, True)
+    }
+))
 
 app = Router(
     [path_rule, METHOD_RULE, CONTENT_TYPE_RULE],
