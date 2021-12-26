@@ -1,6 +1,7 @@
 from json import loads, JSONDecodeError
 from .error import HTTPException
 
+
 class Int:
     def __init__(self, min=None, max=None):
         self.min = min
@@ -8,13 +9,13 @@ class Int:
 
     def __call__(self, value):
         if value.__class__ != int:
-            return False
+            return False, 'expected int, found \'%s\' of type %s' % (value, value.__class__.__name__)
         elif self.min is not None and self.min > value:
-            return False
+            return False, 'expected int bigger than %s, found %s' % (self.min, value)
         elif self.max is not None and self.max < value:
-            return False
+            return False, 'expected int smaler than %s, found %s' % (self.min, value)
         else:
-            return True
+            return True, ''
 
 
 class Float:
@@ -24,39 +25,52 @@ class Float:
 
     def __call__(self, value):
         if value.__class__ != float:
-            return False
+            return False, 'expected float, found \'%s\' of type %s' % (value, value.__class__.__name__)
         elif self.min is not None and self.min > value:
-            return False
+            return False, 'expected float bigger than %s, found %s' % (self.min, value)
         elif self.max is not None and self.max < value:
-            return False
+            return False, 'expected float smaler than %s, found %s' % (self.min, value)
         else:
-            return True
+            return True, ''
 
 
 def Boolean(value):
-    return value.__class__ == bool
+    return value.__class__ == bool, 'expected boolean, found \'%s\' of type %s' % (value, value.__class__.__name__)
 
 
 def String(value):
-    return value.__class__ == str
+    return value.__class__ == str, 'expected string, found \'%s\' of type %s' % (value, value.__class__.__name__)
 
 
 class List:
-    def __init__(self, type):
-        self.type = type
+    def __init__(self, filter):
+        self.filter = filter
 
     def __call__(self, value):
         if value.__class__ == list:
-            return all(self.type(e) for e in value)
+            for i, e in enumerate(value):
+                check, reason = self.filter(e)
+                if not check:
+                    return False, '%s: %s' % (i, reason)
+            return True, ''
         else:
-            return False
+            return False, 'expected list, found \'%s\' of type %s' % (value, value.__class__.__name__)
+
 
 class Options:
     def __init__(self, *options):
         self.options = options
 
     def __call__(self, value):
-        return any(func(value) for func in self.options)
+        reasons = []
+        for filter in self.options:
+            check, reason = filter(value)
+            if check:
+                return True, ''
+            else:
+                reasons.append(reason)
+        return False, 'Value not allowed (%s).' % ' or '.join(reasons)
+
 
 class Object:
     def __init__(self, entries, ignore_more=False):
@@ -68,21 +82,26 @@ class Object:
                 self.entries[key] = (entries[key], False)
 
         self.ignore_more = ignore_more
-    
+
     def __call__(self, value):
         if value.__class__ == dict:
             value_keys = list(value)
             for key in self.entries:
-                func, optional = self.entries[key]
+                filter, optional = self.entries[key]
                 if key in value_keys:
-                    if not func(value[key]):
-                        return False
+                    check, reason = filter(value[key])
+                    if not check:
+                        return False, '%s: %s' % (key, reason)
                     value_keys.remove(key)
                 elif not optional:
-                    return False
-            return len(value_keys) == 0 or self.ignore_more
+                    return False, 'entry with key \'%s\' required' % key
+            if len(value_keys) == 0 or self.ignore_more:
+                return True, ''
+            else:
+                return False, 'unsupported key \'%s\'' % value_keys[0]
         else:
-            return False
+            return False, 'expected object, found \'%s\' of type %s' % (value, value.__class__.__name__)
+
 
 class FilteredJSONParser:
     def __init__(self, app, filter):
@@ -100,10 +119,11 @@ class FilteredJSONParser:
                     self.json_content = loads(self.raw_content)
                 except JSONDecodeError:
                     raise HTTPException(422, message='Invalid JSON')
-                if self.filter(self.json_content):
+                check, reason = self.filter(self.json_content)
+                if check:
                     return self.app(environ, start_response)
                 else:
-                    raise HTTPException(400, 'JSON does not meet requirements.')
+                    raise HTTPException(400, reason)
             else:
                 raise HTTPException(
                     415, message='Only json content is allowed.')
