@@ -31,17 +31,6 @@ class Request:
     def body_string(self):
         return self.body_bytes.decode('utf-8')
 
-    @cached_property
-    def body_json(self):
-        if len(self.content_type.split('/')) == 1 or 'json' in self.content_type.split('/')[1].split('+'):
-            try:
-                return loads(self.body_bytes)
-            except JSONDecodeError:
-                raise HTTPException(400, 'Invalid JSON')
-        else:
-            raise HTTPException(
-                415, 'Content-Type must be a json type (e.g. \'application/json\').')
-
 
 class Response:
     def __init__(self, status=200, headers={}, body=[]):

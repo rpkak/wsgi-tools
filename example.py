@@ -1,12 +1,13 @@
 from wsgi_tools.error import JSONErrorHandler
 from wsgi_tools.friendly import FriendlyWSGI, Request, Response
 from wsgi_tools.routing import CONTENT_TYPE_RULE, METHOD_RULE, PathRule, Router
+from wsgi_tools.parser import JSONParser
 
 path_rule = PathRule()
 
 
 def create(request: Request):
-    print(request.body_json)
+    print(create_app_parser.json_content)
     response = Response(201)
     response.json_body({
         'id': 0
@@ -24,11 +25,12 @@ def get_options(request: Request):
 create_app = FriendlyWSGI(create)
 options_app = FriendlyWSGI(get_options)
 
+create_app_parser = JSONParser(create_app)
 
 app = Router(
     [path_rule, METHOD_RULE, CONTENT_TYPE_RULE],
     {
-        (('/create',), 'POST', 'json'): create_app,
+        (('/create',), 'POST', 'json'): create_app_parser,
         (('/', int, '/options'), 'GET', None): options_app
     }
 )
