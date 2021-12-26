@@ -45,6 +45,8 @@ class Response:
                           separators=(', ', ': ') if friendly else (',', ':'))
 
     def xml_body(self, etree_element):
+        if isinstance(etree_element, ET.ElementTree):
+            etree_element = etree_element.getroot()
         self.headers['Content-Type'] = 'application/json'
         self.body = ET.tostring(etree_element, encoding='utf-8')
 
