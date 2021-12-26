@@ -4,6 +4,7 @@ from json import dumps, loads, JSONDecodeError
 from wsgi_tools.error import HTTPException
 
 from .utils import get_status_code_string
+import xml.etree.ElementTree as ET
 
 
 class Request:
@@ -42,6 +43,10 @@ class Response:
         self.headers['Content-Type'] = 'application/json'
         self.body = dumps(json, indent=4 if friendly else None,
                           separators=(', ', ': ') if friendly else (',', ':'))
+
+    def xml_body(self, etree_element):
+        self.headers['Content-Type'] = 'application/json'
+        self.body = ET.tostring(etree_element, encoding='utf-8')
 
 
 def _make_body(body):
