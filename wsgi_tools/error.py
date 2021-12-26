@@ -25,7 +25,8 @@ class ErrorHandler(metaclass=ABCMeta):
         except Exception as e:
             if not isinstance(e, HTTPException):
                 print_exc()
-                e = HTTPException(500, message='A server error occurred. Please contact an administrator.', exc_info=exc_info())
+                e = HTTPException(
+                    500, message='A server error occurred. Please contact an administrator.', exc_info=exc_info())
             body, headers = self.handle(e)
             headers.extend(e.headers)
             status = get_status_code_string(e.code)

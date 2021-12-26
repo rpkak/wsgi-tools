@@ -1,10 +1,10 @@
+import xml.etree.ElementTree as ET
 from functools import cached_property
-from json import dumps, loads, JSONDecodeError
+from json import JSONDecodeError, dumps, loads
 
 from wsgi_tools.error import HTTPException
 
 from .utils import get_status_code_string
-import xml.etree.ElementTree as ET
 
 
 class Request:

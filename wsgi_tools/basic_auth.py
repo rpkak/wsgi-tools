@@ -1,4 +1,5 @@
 from base64 import b64decode
+
 from .error import HTTPException
 
 
@@ -21,7 +22,8 @@ class BasicAuth:
                     if self.is_correct(user, passwd):
                         return self.app(environ, start_response)
                     else:
-                        raise HTTPException(401, message='Wrong user or password')
+                        raise HTTPException(
+                            401, message='Wrong user or password')
                 else:
                     raise HTTPException(
                         400, message='Authentication not processable')
@@ -30,4 +32,5 @@ class BasicAuth:
                     400, message='Authentication not processable')
         else:
             headers = [('WWW-Authenticate', 'Basic realm="%s"' % self.realm)]
-            raise HTTPException(401, message='Authentication required', headers=headers)
+            raise HTTPException(
+                401, message='Authentication required', headers=headers)

@@ -1,8 +1,9 @@
+from wsgi_tools.basic_auth import BasicAuth
 from wsgi_tools.error import JSONErrorHandler
+from wsgi_tools.filtered_parser import (FilteredJSONParser, Float, Int, Object,
+                                        Options, String)
 from wsgi_tools.friendly import FriendlyWSGI, Request, Response
 from wsgi_tools.routing import CONTENT_TYPE_RULE, METHOD_RULE, PathRule, Router
-from wsgi_tools.filtered_parser import FilteredJSONParser, Int, Object, String, Float, Options
-from wsgi_tools.basic_auth import BasicAuth
 
 path_rule = PathRule()
 
@@ -39,7 +40,8 @@ create_app_parser = FilteredJSONParser(create_app, Object(
     }
 ))
 
-create_app = BasicAuth(create_app_parser, check_access, realm='Ability to create something')
+create_app = BasicAuth(create_app_parser, check_access,
+                       realm='Ability to create something')
 
 app = Router(
     [path_rule, METHOD_RULE, CONTENT_TYPE_RULE],

@@ -1,4 +1,5 @@
-from json import loads, JSONDecodeError
+from json import JSONDecodeError, loads
+
 from .error import HTTPException
 
 
