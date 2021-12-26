@@ -6,7 +6,7 @@ with open('README.md') as f:
 
 setup(
     name='wsgi-tools',
-    version='0.0.1',
+    version='0.2.1',
     url='https://github.com/rpkak/wsgi-tools',
     license='Apache 2.0',
     author='rpkak',
