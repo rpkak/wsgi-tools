@@ -7,11 +7,12 @@ from .utils import get_status_code_string, status_codes
 
 
 class HTTPException(Exception):
-    def __init__(self, code, message=None, exc_info=None):
+    def __init__(self, code, message=None, exc_info=None, headers=[]):
         Exception.__init__(self)
         self.code = code
         self.message = message
         self.exc_info = exc_info
+        self.headers = headers
 
 
 class ErrorHandler(metaclass=ABCMeta):
@@ -26,6 +27,7 @@ class ErrorHandler(metaclass=ABCMeta):
                 print_exc()
                 e = HTTPException(500, message='A server error occurred. Please contact an administrator.', exc_info=exc_info())
             body, headers = self.handle(e)
+            headers.extend(e.headers)
             status = get_status_code_string(e.code)
             start_response(status, headers, e.exc_info)
             return body
