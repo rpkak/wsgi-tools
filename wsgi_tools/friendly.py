@@ -1,14 +1,48 @@
+"""This makes WSGI more programmer friendly.
+
+This module includes a WSGI-app with forwards the wsgi-app to a function,
+witch is simpler than a normal WSGI-app function:
+
+If has an request as an argument and can return either a response or a tuple
+of status-code and body or a tuple of status-code, body and headers.
+
+Examples:
+    >>> def foo(request):
+    ...     print(request.body_string)
+    ...     response = Response(status=201)
+    ...     response.json_body({
+    ...         'id': 0
+    ...     })
+    ...     return response
+    ... 
+    >>> app0 = FriendlyWSGI(foo)
+    >>>
+    >>> def bar(request):
+    ...     return 200, request.body_bytes
+    ... 
+    >>> app1 = FriendlyWSGI(bar)
+"""
+
 import xml.etree.ElementTree as ET
 from functools import cached_property
-from json import JSONDecodeError, dumps, loads
-
-from wsgi_tools.error import HTTPException
+from json import dumps
 
 from .utils import get_status_code_string
 
 
 class Request:
+    """A request is an object with attributes from the environ.
+
+    This is passed to the functions.
+
+    """
+
     def __init__(self, environ):
+        """The cunstructor of Request
+
+        Args:
+            environ: The environ of the wsgi call
+        """
         self.environ = environ
         self.method = environ['REQUEST_METHOD']
         self.path = environ['PATH_INFO']
@@ -34,17 +68,39 @@ class Request:
 
 
 class Response:
+    """A response is an object with status, body and headers of the response.
+
+    This can be passed as a return value of the functions.
+    """
+
     def __init__(self, status=200, headers={}, body=[]):
+        """The cunstructor of Response
+
+        Args:
+            status (int | str, optional): The status-code of the response.
+            headers (dict, optional): The headers of the response.
+            body (optional): The body of the response.
+        """
         self.status = status
         self.headers = headers
         self.body = body
 
     def json_body(self, json, friendly=False):
+        """Sets the body to a json value:
+
+        Args:
+            json: The dict / int / bool / etc. for the json-string
+        """
         self.headers['Content-Type'] = 'application/json'
         self.body = dumps(json, indent=4 if friendly else None,
                           separators=(', ', ': ') if friendly else (',', ':'))
 
     def xml_body(self, etree_element):
+        """Sets the body to a xml value:
+
+        Args:
+            etree_element (ET.Element | ET.ElementTree): The root element of the xml.
+        """
         if isinstance(etree_element, ET.ElementTree):
             etree_element = etree_element.getroot()
         self.headers['Content-Type'] = 'application/json'
@@ -61,7 +117,15 @@ def _make_body(body):
 
 
 class FriendlyWSGI:
+    """The WSGI-App, which forwards the request to the functions.
+    """
+
     def __init__(self, func):
+        """The cunstructor of Response
+
+        Args:
+            func: the more programmer friendly function.
+        """
         self.func = func
 
     def __call__(self, environ, start_response):

@@ -1,10 +1,40 @@
-from json import loads, JSONDecodeError
-from .error import HTTPException
+"""This module includes WSGI-apps, which parse content and call another WSGI-app.
+
+Do not use
+
+```python
+environ['wsgi.input'].read()
+```
+
+except in this parsers.
+
+If you want the raw bytes content, you can use:
+
+```python
+parser.raw_content
+```
+
+"""
 import xml.etree.ElementTree as ET
+from json import JSONDecodeError, loads
+
+from .error import HTTPException
 
 
 class JSONParser:
+    """A WSIG app, which parses json from the content.
+
+    Attributes:
+        raw_content (bytes): the raw content of the body
+        json_content: the json content
+    """
+
     def __init__(self, app):
+        """The cunstructor of JSONParser
+
+        Args:
+            app: The WSGI-app, the parser will forward.
+        """
         self.app = app
         self.raw_content = None
         self.json_content = None
@@ -27,7 +57,19 @@ class JSONParser:
 
 
 class XMLParser:
+    """A WSIG app, which parses xml from the content.
+
+    Attributes:
+        raw_content (bytes): the raw content of the body
+        root_element (ET.Element): the root element of the xml element-tree
+    """
+
     def __init__(self, app):
+        """The cunstructor of XMLParser
+
+        Args:
+            app: The WSGI-app, the parser will forward.
+        """
         self.app = app
         self.raw_content = None
         self.root_element = None
