@@ -7,9 +7,10 @@ Welcome to WSGI-Tools's documentation!
 ======================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
+   api/modules
 
 
 Indices and tables
@@ -17,4 +18,3 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`
