@@ -1,13 +1,16 @@
-import os
-
 from setuptools import find_packages, setup
+
+from wsgi_tools import __version__
 
 with open('README.md') as f:
     long_description = f.read()
 
+with open('docs-requirements.txt') as f:
+    docs_requirements = f.readlines()
+
 setup(
     name='wsgi-tools',
-    version='0.4.0',
+    version=__version__,
     url='https://github.com/rpkak/wsgi-tools',
     license='Apache 2.0',
     author='rpkak',
@@ -22,5 +25,8 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: WSGI',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet'
-    ]
+    ],
+    extras_require={
+        'docs': docs_requirements
+    }
 )
