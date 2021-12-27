@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to WSGI-Tools's documentation!
-======================================
+WSGI-Tools
+==========
 
 .. toctree::
    :maxdepth: 1
@@ -12,6 +12,7 @@ Welcome to WSGI-Tools's documentation!
 
    api/modules
 
+WSGI-Tools is a collection of WSGI tools like routers and errorhandlers.
 
 Indices and tables
 ==================
