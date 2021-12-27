@@ -210,7 +210,7 @@ class Router:
     """
 
     def __init__(self, rules, routes):
-        """Initialices the Router
+        """The cunstructor of Router
 
         Args:
             rules (list(Rule)): A list of the rules you want to use.
