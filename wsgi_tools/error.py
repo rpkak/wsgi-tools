@@ -12,18 +12,16 @@ from .utils import get_status_code_string, status_codes
 
 
 class HTTPException(Exception):
-    """A Exception which says, what status-code and what message should be displayed
+    """A Exception which says, what status-code and what message should be displayed.
+
+    Args:
+        code (int | str): The status-code of this Exception
+        message (str, optional): The message of the error.
+        exc_info (optional): sys.exc_info() if raised because of an other exception.
+        headers (list(tuple), optional): specific headers for this exception
     """
 
     def __init__(self, code, message=None, exc_info=None, headers=[]):
-        """The cunstructor of HTTPException
-
-        Args:
-            code (int | str): The status-code of this Exception
-            message (str, optional): The message of the error.
-            exc_info (optional): sys.exc_info() if raised because of an other exception.
-            headers (list(tuple), optional): specific headers for this exception
-        """
         Exception.__init__(self)
         self.code = code
         self.message = message
@@ -38,14 +36,12 @@ class ErrorHandler(metaclass=ABCMeta):
     `'A server error occurred. Please contact an administrator.'` and the exc_info will be taken.
 
     This is an abstract class. The handle method needs to be overwritten.
+
+    Args:
+        app: The WSGI-app, which is called by the ErrorHandler
     """
 
     def __init__(self, app):
-        """The cunstructor of ErrorHandler
-
-        Args:
-            app: The WSGI-app, which is called by the ErrorHandler
-        """
         self.app = app
 
     def __call__(self, environ, start_response):
@@ -71,16 +67,14 @@ class ErrorHandler(metaclass=ABCMeta):
 
 class JSONErrorHandler(ErrorHandler):
     """An ErrorHandler which returns the error in the json-body.
+
+    Args:
+        friendly (bool, optional): If true, the output will be human readable, else (default), the output will be minimal.
+        *args: The args of ErrorHandler
+        *kwargs: The kwargs of ErrorHandler
     """
 
     def __init__(self, *args, friendly=False, **kwargs):
-        """The cunstructor of ErrorHandler
-
-        Args:
-            friendly (bool, optional): If true, the output will be human readable, else (default), the output will be minimal.
-            *args: The args of ErrorHandler
-            *kwargs: The kwargs of ErrorHandler
-        """
         ErrorHandler.__init__(self, *args, **kwargs)
         self.friendly = friendly
 

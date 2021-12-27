@@ -207,17 +207,15 @@ For example:
 
 class Router:
     """The WSGI-app, which forwards requests on their environ.
+
+    Args:
+        rules (list(Rule)): A list of the rules you want to use.
+        routes (dict): A dict representing the routes. A route is an dict-entry with a tuple or list
+            with the args for all rules for this route as the key and the WSGI-app the router shoult
+            forward to as the value.
     """
 
     def __init__(self, rules, routes):
-        """The cunstructor of Router
-
-        Args:
-            rules (list(Rule)): A list of the rules you want to use.
-            routes (dict): A dict representing the routes. A route is an dict-entry with a tuple or list
-                with the args for all rules for this route as the key and the WSGI-app the router shoult
-                forward to as the value.
-        """
         self.rules = rules
         self.routes = routes
 

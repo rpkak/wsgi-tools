@@ -8,17 +8,15 @@ from .error import HTTPException
 
 class BasicAuth:
     """A WSGI-app which asks you to authenticate if you arn't and forwards the request othervise.
+
+    Args:
+        app: The WSGI app with authenticated only access
+        is_correct: a function which processes from the username and the passwd, whether it is
+            correct or wrong.
+        realm (str, optional): What is forbitten without authentication.
     """
 
     def __init__(self, app, is_correct, realm='Access to content'):
-        """The cunstructor of BasicAuth
-
-        Args:
-            app: The WSGI app with authenticated only access
-            is_correct: a function which processes from the username and the passwd, whether it is
-                correct or wrong.
-            realm (str, optional): What is forbitten without authentication.
-        """
         self.app = app
         self.is_correct = is_correct
         self.realm = realm

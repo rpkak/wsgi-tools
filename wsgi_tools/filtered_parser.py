@@ -27,15 +27,13 @@ class Int:
     """A filter class, which checks if values are ints and if they are in a specific range.
 
     Int is not directly a filter, but has to be constructed.
+
+    Args:
+        min (int, optional): The minimum value.
+        max (int, optional): The maximum value.
     """
 
     def __init__(self, min=None, max=None):
-        """The cunstructor of Int
-
-        Args:
-            min (int, optional): The minimum value.
-            max (int, optional): The maximum value.
-        """
         self.min = min
         self.max = max
 
@@ -54,15 +52,13 @@ class Float:
     """A filter class, which checks if values are floats and if they are in a specific range.
 
     Float is not directly a filter, but has to be constructed.
+
+    Args:
+        min (float, optional): The minimum value.
+        max (float, optional): The maximum value.
     """
 
     def __init__(self, min=None, max=None):
-        """The cunstructor of Float
-
-        Args:
-            min (float, optional): The minimum value.
-            max (float, optional): The maximum value.
-        """
         self.min = min
         self.max = max
 
@@ -97,14 +93,12 @@ class List:
     """A filter class, which checks if values are lists and if their content is correct.
 
     List is not directly a filter, but has to be constructed.
+
+    Args:
+        filter: The filter, which filters the contents of the list.
     """
 
     def __init__(self, filter):
-        """The cunstructor of List
-
-        Args:
-            filter: The filter, which filters the contents of the list.
-        """
         self.filter = filter
 
     def __call__(self, value):
@@ -122,14 +116,12 @@ class Options:
     """A filter class, which checks if the content matches one of multiple filters
 
     Options is not directly a filter, but has to be constructed.
+
+    Args:
+        options: The filters, where one of them should match.
     """
 
     def __init__(self, *options):
-        """The cunstructor of Options
-
-        Args:
-            options: The filters, where one of them should match.
-        """
         self.options = options
 
     def __call__(self, value):
@@ -147,18 +139,16 @@ class Object:
     """A filter class, which checks if values are objects and if their content is correct.
 
     Object is not directly a filter, but has to be constructed.
+
+    Args:
+        entries (dict): a dict with the keys of the object as keys and the filters of
+            the values of the object as values. If some entries are optional, they the values shoule be a tuple
+            with the filter and True.
+        ignore_more (bool, optional): If False (default), an objects don't match if they
+            have more entries than the filter.
     """
 
     def __init__(self, entries, ignore_more=False):
-        """The cunstructor of Object
-
-        Args:
-            entries (dict): a dict with the keys of the object as keys and the filters of
-                the values of the object as values. If some entries are optional, they the values shoule be a tuple
-                with the filter and True.
-            ignore_more (bool, optional): If False (default), an objects don't match if they
-                have more entries than the filter.
-        """
         self.entries = {}
         for key in entries:
             if isinstance(entries[key], tuple):
@@ -194,15 +184,13 @@ class FilteredJSONParser:
     Attributes:
         raw_content (bytes): the raw content of the body
         json_content: the json content
+
+    Args:
+        app: The WSGI-app, the parser will forward.
+        filter: The filter, which the json-content should match.
     """
 
     def __init__(self, app, filter):
-        """The cunstructor of FilteredJSONParser
-
-        Args:
-            app: The WSGI-app, the parser will forward.
-            filter: The filter, which the json-content should match.
-        """
         self.app = app
         self.filter = filter
         self.raw_content = None

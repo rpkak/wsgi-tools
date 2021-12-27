@@ -35,14 +35,11 @@ class Request:
 
     This is passed to the functions.
 
+    Args:
+        environ: The environ of the wsgi call
     """
 
     def __init__(self, environ):
-        """The cunstructor of Request
-
-        Args:
-            environ: The environ of the wsgi call
-        """
         self.environ = environ
         self.method = environ['REQUEST_METHOD']
         self.path = environ['PATH_INFO']
@@ -71,16 +68,14 @@ class Response:
     """A response is an object with status, body and headers of the response.
 
     This can be passed as a return value of the functions.
+
+    Args:
+        status (int | str, optional): The status-code of the response.
+        headers (dict, optional): The headers of the response.
+        body (optional): The body of the response.
     """
 
     def __init__(self, status=200, headers={}, body=[]):
-        """The cunstructor of Response
-
-        Args:
-            status (int | str, optional): The status-code of the response.
-            headers (dict, optional): The headers of the response.
-            body (optional): The body of the response.
-        """
         self.status = status
         self.headers = headers
         self.body = body
@@ -118,14 +113,12 @@ def _make_body(body):
 
 class FriendlyWSGI:
     """The WSGI-App, which forwards the request to the functions.
+
+    Args:
+        func: the more programmer friendly function.
     """
 
     def __init__(self, func):
-        """The cunstructor of Response
-
-        Args:
-            func: the more programmer friendly function.
-        """
         self.func = func
 
     def __call__(self, environ, start_response):
