@@ -5,17 +5,18 @@ so that you can't pass any json you want to the parser, but only json that works
 
 Do not use
 
-```python
-environ['wsgi.input'].read()
-```
+.. code:: python
+
+    environ['wsgi.input'].read()
 
 except in this parsers.
 
 If you want the raw bytes content, you can use:
 
-```python
-parser.raw_content
-```
+.. code:: python
+
+    parser.raw_content
+
 
 """
 from json import JSONDecodeError, loads

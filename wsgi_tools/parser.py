@@ -2,17 +2,17 @@
 
 Do not use
 
-```python
-environ['wsgi.input'].read()
-```
+.. code:: python
+
+    environ['wsgi.input'].read()
 
 except in this parsers.
 
 If you want the raw bytes content, you can use:
 
-```python
-parser.raw_content
-```
+.. code:: python
+
+    parser.raw_content
 
 """
 import xml.etree.ElementTree as ET
