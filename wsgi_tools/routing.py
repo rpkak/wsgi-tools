@@ -1,22 +1,90 @@
+"""With routing you can forward your request to specific WSGI-apps.
+
+There are two main classes in this module: Router and Rule
+
+The Router is the WSGI-app, which uses rules to know, to which WSGI-app it should forward.
+
+You construct the Router with a list of all Rules you use and with an arg for each route and rule.
+
+The Rule defindes if the request and the (arg of this rule in the) route match.
+
+Example:
+    >>> from wsgi_tools.routing import CONTENT_TYPE_RULE, METHOD_RULE, PathRule, Router
+
+    >>> path_rule = PathRule()
+
+    >>> app = Router(
+    ...     [path_rule, METHOD_RULE, CONTENT_TYPE_RULE],
+    ...     {
+    ...         (('/create',), 'POST', 'json'): create_app,
+    ...         (('/', int, '/options'), 'GET', None): options_app
+    ...     }
+    ... )
+
+"""
+
 from abc import ABCMeta, abstractmethod
 
 from wsgi_tools.error import HTTPException
 
 
 class Rule(metaclass=ABCMeta):
+    """A Rule is an object, which defines if request can be forwarded to a route.
+
+    Some Rules also store data of the current request which are accessable
+    from the code which is executed at this request.
+    """
+
     @abstractmethod
     def get_exception(self):
+        """If no route matches this rule, an exception has to be thrown.
+
+        Returns:
+            HTTPException: The exception which will be thrown, if no route supports thie rule.
+        """
         pass
 
     @abstractmethod
     def check(self, environ, value):
-        pass
+        """The Method, which controles, whether an request and a route are matching this rule.
 
-    def clear(self):
+        Args:
+            environ (dict): A WSGI-environ
+            value: the value of this rule for a route
+
+        Returns:
+            bool: True if environ and value are matching, False othervise
+        """
         pass
 
 
 class PathRule(Rule):
+    """A Rule, which controlls the path of the request.
+
+    The arg you have to specifiy in each route is a tuple or a list.
+    This tuple or list has to begin with a string.
+
+    The simplest arg is a tuple, which is only one string.
+
+    `('/',)` is the root document.
+
+    `('/hello',)` is `http://{host}/hello`
+
+    You get an generic path, if you include callables, which have a `str` as the only arg
+    and raise an ValueError if the input is wrong.
+
+    Examples for these callables are `int` and `float`, but you can create your own functions as well.
+
+    If is not allowed, that two of these callables are directly after each others.
+
+    `('/', str, '/foo')` for `/bar/foo` and `args` is `['bar']` or `/hello/foo` and `args` is `['hello']`.
+
+    `('/id/', int, '/user/', str, '/create')` for `/id/321/user/root/create` and `args` is `[321, 'root']`.
+
+    Attributes:
+        args (list): The list of the generic parts of the path.
+    """
+
     def __init__(self):
         self.args = []
 
@@ -59,6 +127,15 @@ class PathRule(Rule):
 
 
 class MethodRule(Rule):
+    """A rule which checks if the http methods match.
+
+    The arg you have to specifiy in each route is a `str` representing the http-method
+    (e.g. `'GET'`, `'POST'` or `'DELETE'`).
+
+    Note:
+        You can use the constant `METHOD_RULE`, because this rule does not have any attributes.
+    """
+
     def check(self, environ, value):
         return value == environ['REQUEST_METHOD']
 
@@ -67,9 +144,34 @@ class MethodRule(Rule):
 
 
 METHOD_RULE = MethodRule()
+"""A rule which checks if the http methods match.
+
+The arg you have to specifiy in each route is a `str` representing the http-method
+(e.g. `'GET'`, `'POST'` or `'DELETE'`).
+"""
 
 
 class ContentTypeRule(Rule):
+    """A rule which checks if the content_types match.
+
+    The arg you have to specifiy in each route is a `str` which represents the content-type or
+    `None` if you don't expect content in this route (e.g. for a `GET` request).
+
+    If the arg is a `str` and includes a `/`, the rule will match, if arg and content-type match exactly.
+
+    If the arg is a `str`, but it doesn't includes any `/`, the rule will match, if the arg is located
+    at any place after the `/` in the content type.
+
+    For example:
+
+    `json` matches `application/json`, `application/foo+json`, `hello/foo+json+bar`, etc.
+
+    `application/json` only matches `application/json`.
+
+    Note:
+        You can use the constant `CONTENT_TYPE_RULE`, because this rule does not have any attributes.
+    """
+
     def check(self, environ, value):
         if environ.get('CONTENT_TYPE') is None:
             return value is None
@@ -85,10 +187,37 @@ class ContentTypeRule(Rule):
 
 
 CONTENT_TYPE_RULE = ContentTypeRule()
+"""A rule which checks if the content_types match.
+
+The arg you have to specifiy in each route is a `str` which represents the content-type or
+`None` if you don't expect content in this route (e.g. for a `GET` request).
+
+If the arg is a `str` and includes a `/`, the rule will match, if arg and content-type match exactly.
+
+If the arg is a `str`, but it doesn't includes any `/`, the rule will match, if the arg is located
+at any place after the `/` in the content type.
+
+For example:
+
+`json` matches `application/json`, `application/foo+json`, `hello/foo+json+bar`, etc.
+
+`application/json` only matches `application/json`.
+"""
 
 
 class Router:
+    """The WSGI-app, which forwards requests on their environ.
+    """
+
     def __init__(self, rules, routes):
+        """Initialices the Router
+
+        Args:
+            rules (list(Rule)): A list of the rules you want to use.
+            routes (dict): A dict representing the routes. A route is an dict-entry with a tuple or list
+                with the args for all rules for this route as the key and the WSGI-app the router shoult
+                forward to as the value.
+        """
         self.rules = rules
         self.routes = routes
 
