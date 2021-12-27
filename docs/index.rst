@@ -6,13 +6,15 @@
 WSGI-Tools
 ==========
 
+WSGI-Tools is a collection of WSGI tools like routers and errorhandlers.
+
 .. toctree::
    :maxdepth: 1
    :caption: Contents:
 
+   docs/index
    api/modules
 
-WSGI-Tools is a collection of WSGI tools like routers and errorhandlers.
 
 Indices and tables
 ==================
