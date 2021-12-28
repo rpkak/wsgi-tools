@@ -3,5 +3,6 @@
 ```{toctree}
 :caption: Modules
 
+error
 friendly
 ```
