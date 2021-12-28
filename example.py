@@ -12,7 +12,8 @@ def create(request: Request):
     print(create_app_parser.json_content)
     response = Response(201)
     response.json_body({
-        'id': 0
+        'id': 0,
+        'you': create_app_auth.user
     })
     return response
 
@@ -40,13 +41,13 @@ create_app_parser = FilteredJSONParser(create_app, Object(
     }
 ))
 
-create_app = BasicAuth(create_app_parser, check_access,
-                       realm='Ability to create something')
+create_app_auth = BasicAuth(create_app_parser, check_access,
+                            realm='Ability to create something')
 
 app = Router(
     [path_rule, METHOD_RULE, CONTENT_TYPE_RULE],
     {
-        (('/create',), 'POST', 'json'): create_app,
+        (('/create',), 'POST', 'json'): create_app_auth,
         (('/', int, '/options'), 'GET', None): options_app
     }
 )
