@@ -3,4 +3,5 @@
 ```{toctree}
 :caption: Modules
 
+friendly
 ```
