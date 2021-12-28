@@ -27,18 +27,18 @@ class JSONParser:
 
     Args:
         app: The WSGI-app, the parser will forward.
-
-    Attributes:
-        raw_content (bytes): the raw content of the body
-        json_content: the json content
     """
 
     @property
     def raw_content(self):
+        """bytes: the raw content of the body
+        """
         return self.request_data.raw_content
 
     @property
     def json_content(self):
+        """the json content
+        """
         return self.request_data.json_content
 
     def __init__(self, app):
@@ -68,18 +68,18 @@ class XMLParser:
 
     Args:
         app: The WSGI-app, the parser will forward.
-
-    Attributes:
-        raw_content (bytes): the raw content of the body
-        root_element (ET.Element): the root element of the xml element-tree
     """
 
     @property
     def raw_content(self):
+        """bytes: the raw content of the body
+        """
         return self.request_data.raw_content
 
     @property
     def root_element(self):
+        """ET.Element: the root element of the xml element-tree
+        """
         return self.request_data.root_element
 
     def __init__(self, app):

@@ -15,13 +15,12 @@ class BasicAuth:
         is_correct: a function which processes from the username and the passwd, whether it is
             correct or wrong.
         realm (str, optional): What is forbitten without authentication.
-
-    Attributes:
-        user (str): The user which is logged in in this request.
     """
 
     @property
     def user(self):
+        """str: The user which is logged in in this request.
+        """
         return self.request_data.user
 
     def __init__(self, app, is_correct, realm='Access to content'):

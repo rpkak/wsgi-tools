@@ -183,10 +183,6 @@ class Object:
 class FilteredJSONParser:
     """A WSIG app, which parses json from the content.
 
-    Attributes:
-        raw_content (bytes): the raw content of the body
-        json_content: the json content
-
     Args:
         app: The WSGI-app, the parser will forward.
         filter: The filter, which the json-content should match.
@@ -194,10 +190,14 @@ class FilteredJSONParser:
 
     @property
     def raw_content(self):
+        """bytes: the raw content of the body
+        """
         return self.request_data.raw_content
 
     @property
     def json_content(self):
+        """the json content
+        """
         return self.request_data.json_content
 
     def __init__(self, app, filter):
