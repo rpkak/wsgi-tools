@@ -15,6 +15,7 @@ parser.raw_content
 ```
 
 """
+import threading
 import xml.etree.ElementTree as ET
 from json import JSONDecodeError, loads
 
@@ -29,6 +30,14 @@ class JSONParser:
         json_content: the json content
     """
 
+    @property
+    def raw_content(self):
+        return self.request_data.raw_content
+
+    @property
+    def json_content(self):
+        return self.request_data.json_content
+
     def __init__(self, app):
         """The cunstructor of JSONParser
 
@@ -36,16 +45,16 @@ class JSONParser:
             app: The WSGI-app, the parser will forward.
         """
         self.app = app
-        self.raw_content = None
-        self.json_content = None
+        self.request_data = threading.local()
 
     def __call__(self, environ, start_response):
         if 'CONTENT_TYPE' in environ:
             if 'json' in environ['CONTENT_TYPE'].split('/')[1].split('+'):
-                self.raw_content = environ['wsgi.input'].read(
+                self.request_data.raw_content = environ['wsgi.input'].read(
                     int(environ.get('CONTENT_LENGTH', 0)))
                 try:
-                    self.json_content = loads(self.raw_content)
+                    self.request_data.json_content = loads(
+                        self.request_data.raw_content)
                 except JSONDecodeError:
                     raise HTTPException(422, message='Invalid JSON')
                 return self.app(environ, start_response)
@@ -64,6 +73,14 @@ class XMLParser:
         root_element (ET.Element): the root element of the xml element-tree
     """
 
+    @property
+    def raw_content(self):
+        return self.request_data.raw_content
+
+    @property
+    def root_element(self):
+        return self.request_data.root_element
+
     def __init__(self, app):
         """The cunstructor of XMLParser
 
@@ -71,16 +88,16 @@ class XMLParser:
             app: The WSGI-app, the parser will forward.
         """
         self.app = app
-        self.raw_content = None
-        self.root_element = None
+        self.request_data = threading.local()
 
     def __call__(self, environ, start_response):
         if 'CONTENT_TYPE' in environ:
             if 'xml' in environ['CONTENT_TYPE'].split('/')[1].split('+'):
-                self.raw_content = environ['wsgi.input'].read(
+                self.request_data.raw_content = environ['wsgi.input'].read(
                     int(environ.get('CONTENT_LENGTH', 0)))
                 try:
-                    self.root_element = ET.fromstring(self.raw_content)
+                    self.request_data.root_element = ET.fromstring(
+                        self.request_data.raw_content)
                 except ET.ParseError:
                     raise HTTPException(422, message='Invalid XML')
                 return self.app(environ, start_response)
