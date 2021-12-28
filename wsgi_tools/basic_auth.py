@@ -1,6 +1,7 @@
 """Basic Auth implementation in WSGI.
 """
 
+import threading
 from base64 import b64decode
 
 from .error import HTTPException
@@ -8,7 +9,14 @@ from .error import HTTPException
 
 class BasicAuth:
     """A WSGI-app which asks you to authenticate if you arn't and forwards the request othervise.
+
+    Attributes:
+        user (str): The user which is logged in in this request.
     """
+
+    @property
+    def user(self):
+        return self.request_data.user
 
     def __init__(self, app, is_correct, realm='Access to content'):
         """The cunstructor of BasicAuth
@@ -22,6 +30,7 @@ class BasicAuth:
         self.app = app
         self.is_correct = is_correct
         self.realm = realm
+        self.request_data = threading.local()
 
     def __call__(self, environ, start_response):
         if 'HTTP_AUTHORIZATION' in environ and environ['HTTP_AUTHORIZATION'].startswith('Basic '):
@@ -31,9 +40,9 @@ class BasicAuth:
                 string = byte_string.decode('utf-8')
                 i = string.find(':')
                 if i != -1:
-                    user = string[:i]
+                    self.request_data.user = string[:i]
                     passwd = string[i+1:]
-                    if self.is_correct(user, passwd):
+                    if self.is_correct(self.request_data.user, passwd):
                         return self.app(environ, start_response)
                     else:
                         raise HTTPException(
