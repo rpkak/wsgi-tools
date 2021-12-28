@@ -4,5 +4,6 @@
 :caption: Modules
 
 error
+basic_auth
 friendly
 ```

@@ -53,7 +53,7 @@ class Rule(metaclass=ABCMeta):
             value: the value of this rule for a route
 
         Returns:
-            bool: True if environ and value are matching, False othervise
+            bool: True if environ and value are matching, False otherwise
         """
         pass
 
