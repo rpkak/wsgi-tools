@@ -1,7 +1,7 @@
 """This module includes WSGI-apps, which parse content and call another WSGI-app.
 
 Compared to wsgi_tools.parser this also includes a json-filter
-so that you can't pass any json you want to the parser, but only json that works for your app.
+so that you can not pass any json you want to the parser, but only json that works for your app.
 
 Do not use
 
@@ -9,7 +9,7 @@ Do not use
 
     environ['wsgi.input'].read()
 
-except in this parsers.
+except in this parser.
 
 If you want the raw bytes content, you can use:
 
@@ -144,9 +144,9 @@ class Object:
 
     Args:
         entries (dict): a dict with the keys of the object as keys and the filters of
-            the values of the object as values. If some entries are optional, they the values shoule be a tuple
+            the values of the object as values. If some entries are optional, the values should be a tuple
             with the filter and True.
-        ignore_more (bool, optional): If False (default), an objects don't match if they
+        ignore_more (bool, optional): If False (default), objects do not match if they
             have more entries than the filter.
     """
 

@@ -1,6 +1,6 @@
-"""Catch any Exception and send, that an error occured.
+"""Catches any Exception and returns that an error occured.
 
-This is requried by many other modules of this package.
+This is required by many other modules of this package.
 """
 
 from abc import ABCMeta, abstractmethod
@@ -17,7 +17,7 @@ class HTTPException(Exception):
     Args:
         code (int | str): The status-code of this Exception
         message (str, optional): The message of the error.
-        exc_info (optional): sys.exc_info() if raised because of an other exception.
+        exc_info (optional): sys.exc_info() if raised because of another exception.
         headers (list(tuple), optional): specific headers for this exception
     """
 
@@ -30,10 +30,10 @@ class HTTPException(Exception):
 
 
 class ErrorHandler(metaclass=ABCMeta):
-    """A WSGI-app which executes another WSGI-App and handles exceptions, if they occure.
+    """A WSGI-app which executes another WSGI-App and handles exceptions, if they occur.
 
-    If the exception is no HTTPException, a HTTPException with the code 500, the message
-    `'A server error occurred. Please contact an administrator.'` and the exc_info will be taken.
+    If the exception is no HTTPException, an HTTPException with the code 500, the message
+    :code:`'A server error occurred. Please contact an administrator.'` and the exc_info will be taken.
 
     This is an abstract class. The handle method needs to be overwritten.
 

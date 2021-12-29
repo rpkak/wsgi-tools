@@ -8,13 +8,13 @@ from .error import HTTPException
 
 
 class BasicAuth:
-    """A WSGI-app which asks you to authenticate if you arn't and forwards the request otherwise.
+    """A WSGI-app which asks you to authenticate if you are not and forwards the request otherwise.
 
     Args:
-        app: The WSGI app with authenticated only access
-        is_correct: a function which processes from the username and the passwd, whether it is
+        app: The WSGI-app with authenticated access only
+        is_correct: a function which processes username and the passwd, whether it is
             correct or wrong.
-        realm (str, optional): What is forbitten without authentication.
+        realm (str, optional): String describing, what is forbidden without authentication.
     """
 
     @property

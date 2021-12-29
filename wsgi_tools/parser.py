@@ -6,7 +6,7 @@ Do not use
 
     environ['wsgi.input'].read()
 
-except in this parsers.
+except in these parsers.
 
 If you want the raw bytes content, you can use:
 

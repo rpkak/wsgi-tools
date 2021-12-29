@@ -1,9 +1,9 @@
 """This makes WSGI more programmer friendly.
 
 This module includes a WSGI-app with forwards the wsgi-app to a function,
-witch is simpler than a normal WSGI-app function:
+which is simpler than a normal WSGI-app function:
 
-If has an request as an argument and can return either a response or a tuple
+It has a request as an argument and can return either a response or a tuple
 of status-code and body or a tuple of status-code, body and headers.
 
 Examples:
@@ -91,7 +91,7 @@ class Response:
                           separators=(', ', ': ') if friendly else (',', ':'))
 
     def xml_body(self, etree_element):
-        """Sets the body to a xml value:
+        """Sets the body to an xml value:
 
         Args:
             etree_element (ET.Element | ET.ElementTree): The root element of the xml.

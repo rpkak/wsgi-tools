@@ -1,4 +1,4 @@
-"""Utilities of the `wsgi_tools` package.
+"""Utilities of the :py:meth:`wsgi_tools` package.
 
 Contains some general constants and functions.
 """
@@ -73,7 +73,7 @@ The keys are the codes as ints and the values are the strings without numbers.
 
 
 def get_status_code_string(code):
-    """Returns the string of the status.
+    """Returns the status as a string.
 
     Args:
         code (int | str): The int or string of this status_code

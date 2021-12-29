@@ -1,12 +1,12 @@
 """With routing you can forward your request to specific WSGI-apps.
 
-There are two main classes in this module: Router and Rule
+There are two main classes in this module: :py:meth:`Router` and :py:meth:`Rule`
 
-The Router is the WSGI-app, which uses rules to know, to which WSGI-app it should forward.
+The :py:meth:`Router` is the WSGI-app, which uses rules to identify, to which WSGI-app it should forward.
 
-You construct the Router with a list of all Rules you use and with an arg for each route and rule.
+You construct the :py:meth:`Router` with a list of all rules you use and with an arg for each route and rule.
 
-The Rule defindes if the request and the (arg of this rule in the) route match.
+The :py:meth:`Rule` defines if the request and the (arg of this rule in the) route match.
 
 Example:
     >>> from wsgi_tools.routing import CONTENT_TYPE_RULE, METHOD_RULE, PathRule, Router
@@ -29,9 +29,9 @@ from wsgi_tools.error import HTTPException
 
 
 class Rule(metaclass=ABCMeta):
-    """A Rule is an object, which defines if request can be forwarded to a route.
+    """A Rule is an object, which defines if requests can be forwarded to a route.
 
-    Some Rules also store data of the current request which are accessable
+    Some Rules also store data of the current request which are accessible
     from the code which is executed at this request.
     """
 
@@ -46,7 +46,7 @@ class Rule(metaclass=ABCMeta):
 
     @abstractmethod
     def check(self, environ, value):
-        """The Method, which controles, whether an request and a route are matching this rule.
+        """The Method, which controls, whether a request and a route are matching this rule.
 
         Args:
             environ (dict): A WSGI-environ
@@ -59,27 +59,27 @@ class Rule(metaclass=ABCMeta):
 
 
 class PathRule(Rule):
-    """A Rule, which controlls the path of the request.
+    """A Rule, which controls the path of the request.
 
     The arg you have to specifiy in each route is a tuple or a list.
     This tuple or list has to begin with a string.
 
     The simplest arg is a tuple, which is only one string.
 
-    `('/',)` is the root document.
+    :code:`('/',)` is the root document.
 
-    `('/hello',)` is `http://{host}/hello`
+    :code:`('/hello',)` is :code:`http://{host}/hello`
 
-    You get an generic path, if you include callables, which have a `str` as the only arg
-    and raise an ValueError if the input is wrong.
+    You get an generic path, if you include callables, which have a :code:`str` as the only arg
+    and raise a ValueError if the input is wrong.
 
-    Examples for these callables are `int` and `float`, but you can create your own functions as well.
+    Examples for these callables are :code:`int` and :code:`float`, but you can create your own functions as well.
 
-    If is not allowed, that two of these callables are directly after each others.
+    It is not allowed that two of these callables are directly follow upon each other.
 
-    `('/', str, '/foo')` for `/bar/foo` and `args` is `['bar']` or `/hello/foo` and `args` is `['hello']`.
+    :code:`('/', str, '/foo')` for :code:`/bar/foo` and :code:`args` is :code:`['bar']` or :code:`/hello/foo` and :code:`args` is :code:`['hello']`.
 
-    `('/id/', int, '/user/', str, '/create')` for `/id/321/user/root/create` and `args` is `[321, 'root']`.
+    :code:`('/id/', int, '/user/', str, '/create')` for :code:`/id/321/user/root/create` and :code:`args` is :code:`[321, 'root']`.
 
     Attributes:
         args (list): The list of the generic parts of the path.
@@ -127,13 +127,13 @@ class PathRule(Rule):
 
 
 class MethodRule(Rule):
-    """A rule which checks if the http methods match.
+    """A rule which checks whether the http methods match.
 
-    The arg you have to specifiy in each route is a `str` representing the http-method
-    (e.g. `'GET'`, `'POST'` or `'DELETE'`).
+    The arg you have to specifiy in each route is a :code:`str` representing the http-method
+    (e.g. :code:`'GET'`, :code:`'POST'` or :code:`'DELETE'`).
 
     Note:
-        You can use the constant `METHOD_RULE`, because this rule does not have any attributes.
+        You can use the constant :py:meth:`METHOD_RULE`, because this rule does not have any attributes.
     """
 
     def check(self, environ, value):
@@ -144,32 +144,32 @@ class MethodRule(Rule):
 
 
 METHOD_RULE = MethodRule()
-"""A rule which checks if the http methods match.
+"""A rule which checks whether the http methods match.
 
-The arg you have to specifiy in each route is a `str` representing the http-method
-(e.g. `'GET'`, `'POST'` or `'DELETE'`).
+The arg you have to specifiy in each route is a :code:`str` representing the http-method
+(e.g. :code:`'GET'`, :code:`'POST'` or :code:`'DELETE'`).
 """
 
 
 class ContentTypeRule(Rule):
-    """A rule which checks if the content_types match.
+    """A rule which checks whether the content_types match.
 
-    The arg you have to specifiy in each route is a `str` which represents the content-type or
-    `None` if you don't expect content in this route (e.g. for a `GET` request).
+    The arg you have to specifiy in each route is a :code:`str` which represents the content-type or
+    :code:`None` if you do not expect content in this route (e.g. for a :code:`GET` request).
 
-    If the arg is a `str` and includes a `/`, the rule will match, if arg and content-type match exactly.
+    If the arg is a :code:`str` and includes a :code:`/`, the rule will match, if arg and content-type match exactly.
 
-    If the arg is a `str`, but it doesn't includes any `/`, the rule will match, if the arg is located
-    at any place after the `/` in the content type.
+    If the arg is a :code:`str`, but it does not includes any :code:`/`, the rule will match, if the arg is located
+    at any place after the :code:`/` in the content type.
 
     For example:
 
-    `json` matches `application/json`, `application/foo+json`, `hello/foo+json+bar`, etc.
+    :code:`json` matches :code:`application/json`, :code:`application/foo+json`, :code:`hello/foo+json+bar`, etc.
 
-    `application/json` only matches `application/json`.
+    :code:`application/json` only matches :code:`application/json`.
 
     Note:
-        You can use the constant `CONTENT_TYPE_RULE`, because this rule does not have any attributes.
+        You can use the constant :py:meth:`CONTENT_TYPE_RULE`, because this rule does not have any attributes.
     """
 
     def check(self, environ, value):
@@ -187,21 +187,21 @@ class ContentTypeRule(Rule):
 
 
 CONTENT_TYPE_RULE = ContentTypeRule()
-"""A rule which checks if the content_types match.
+"""A rule which checks whether the content_types match.
 
-The arg you have to specifiy in each route is a `str` which represents the content-type or
-`None` if you don't expect content in this route (e.g. for a `GET` request).
+The arg you have to specifiy in each route is a :code:`str` which represents the content-type or
+:code:`None` if you do not expect content in this route (e.g. for a :code:`GET` request).
 
-If the arg is a `str` and includes a `/`, the rule will match, if arg and content-type match exactly.
+If the arg is a :code:`str` and includes a :code:`/`, the rule will match, if arg and content-type match exactly.
 
-If the arg is a `str`, but it doesn't includes any `/`, the rule will match, if the arg is located
-at any place after the `/` in the content type.
+If the arg is a :code:`str`, but it does not includes any :code:`/`, the rule will match, if the arg is located
+at any place after the :code:`/` in the content type.
 
 For example:
 
-`json` matches `application/json`, `application/foo+json`, `hello/foo+json+bar`, etc.
+:code:`json` matches :code:`application/json`, :code:`application/foo+json`, :code:`hello/foo+json+bar`, etc.
 
-`application/json` only matches `application/json`.
+:code:`application/json` only matches :code:`application/json`.
 """
 
 
@@ -210,8 +210,8 @@ class Router:
 
     Args:
         rules (list(Rule)): A list of the rules you want to use.
-        routes (dict): A dict representing the routes. A route is an dict-entry with a tuple or list
-            with the args for all rules for this route as the key and the WSGI-app the router shoult
+        routes (dict): A dict representing the routes. A route is a dict-entry with a tuple or list
+            with the args for all rules for this route as the key and the WSGI-app the router should
             forward to as the value.
     """
 

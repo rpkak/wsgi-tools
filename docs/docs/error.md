@@ -2,7 +2,7 @@
 
 API-Reference: {py:meth}`wsgi_tools.error`
 
-This module includes the abstract WSGI-app {py:meth}`wsgi_tools.error.ErrorHandler`. It simply calls the WSGI-app, specified in the constructor. If a {py:meth}`wsgi_tools.error.HTTPException` occures, the {py:meth}`wsgi_tools.error.ErrorHandler` will handle it using the abstract {py:meth}`wsgi_tools.error.ErrorHandler.handle` method. If any other exception occures, the {py:meth}`wsgi_tools.error.ErrorHandler` will create a `500 Internal Server Error` and handle it.
+This module includes the abstract WSGI-app {py:meth}`wsgi_tools.error.ErrorHandler`. It simply calls the WSGI-app, specified in the constructor. If a {py:meth}`wsgi_tools.error.HTTPException` occurs, the {py:meth}`wsgi_tools.error.ErrorHandler` will handle it using the abstract {py:meth}`wsgi_tools.error.ErrorHandler.handle` method. If any other exception occurs, the {py:meth}`wsgi_tools.error.ErrorHandler` will create a `500 Internal Server Error` and handle it.
 
 There are two implementations of {py:meth}`wsgi_tools.error.ErrorHandler` in this module, but you can do your own as well:
 
@@ -22,7 +22,7 @@ There are two implementations of {py:meth}`wsgi_tools.error.ErrorHandler` in thi
 
 - {py:meth}`wsgi_tools.error.HTMLErrorHandler`:
 
-  The handle method returns a html-string, which is human readable in the browser.
+  The handle method returns an html-string, which is human readable in the browser.
 
   The internal server error thrown by the handler, will be:
 
