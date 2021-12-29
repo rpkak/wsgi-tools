@@ -27,7 +27,7 @@ jobs:
       run: |
         python -m pip install -U pip wheel
     - name: Build package
-      run: python setup.py bdist --formats=egg,gztar,zip bdist_wheel sdist
+      run: python setup.py bdist_wheel sdist
     - name: Publish package
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
