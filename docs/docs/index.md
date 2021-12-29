@@ -5,5 +5,6 @@
 
 error
 basic_auth
+parser
 friendly
 ```
