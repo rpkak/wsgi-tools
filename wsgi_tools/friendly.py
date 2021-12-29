@@ -1,9 +1,9 @@
 """This makes WSGI more programmer friendly.
 
 This module includes a WSGI-app with forwards the wsgi-app to a function,
-witch is simpler than a normal WSGI-app function:
+which is simpler than a normal WSGI-app function:
 
-If has an request as an argument and can return either a response or a tuple
+It has a request as an argument and can return either a response or a tuple
 of status-code and body or a tuple of status-code, body and headers.
 
 Examples:
@@ -35,14 +35,11 @@ class Request:
 
     This is passed to the functions.
 
+    Args:
+        environ: The environ of the wsgi call
     """
 
     def __init__(self, environ):
-        """The cunstructor of Request
-
-        Args:
-            environ: The environ of the wsgi call
-        """
         self.environ = environ
         self.method = environ['REQUEST_METHOD']
         self.path = environ['PATH_INFO']
@@ -71,16 +68,14 @@ class Response:
     """A response is an object with status, body and headers of the response.
 
     This can be passed as a return value of the functions.
+
+    Args:
+        status (int | str, optional): The status-code of the response.
+        headers (dict, optional): The headers of the response.
+        body (optional): The body of the response.
     """
 
     def __init__(self, status=200, headers={}, body=[]):
-        """The cunstructor of Response
-
-        Args:
-            status (int | str, optional): The status-code of the response.
-            headers (dict, optional): The headers of the response.
-            body (optional): The body of the response.
-        """
         self.status = status
         self.headers = headers
         self.body = body
@@ -96,7 +91,7 @@ class Response:
                           separators=(', ', ': ') if friendly else (',', ':'))
 
     def xml_body(self, etree_element):
-        """Sets the body to a xml value:
+        """Sets the body to an xml value:
 
         Args:
             etree_element (ET.Element | ET.ElementTree): The root element of the xml.
@@ -118,14 +113,12 @@ def _make_body(body):
 
 class FriendlyWSGI:
     """The WSGI-App, which forwards the request to the functions.
+
+    Args:
+        func: the more programmer friendly function.
     """
 
     def __init__(self, func):
-        """The cunstructor of Response
-
-        Args:
-            func: the more programmer friendly function.
-        """
         self.func = func
 
     def __call__(self, environ, start_response):

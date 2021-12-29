@@ -36,7 +36,7 @@ create_app_parser = FilteredJSONParser(create_app, Object(
     {
         # Either int or float bigger than 0
         'id': Options(Int(min=0), Float(min=0)),
-        # the True in this tuple says, that this arg is optional
+        # the True in this tuple says that this arg is optional
         'description': (String, True)
     }
 ))

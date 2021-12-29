@@ -1,6 +1,6 @@
-"""Catch any Exception and send, that an error occured.
+"""Catches any Exception and returns that an error occured.
 
-This is requried by many other modules of this package.
+This is required by many other modules of this package.
 """
 
 from abc import ABCMeta, abstractmethod
@@ -12,18 +12,16 @@ from .utils import get_status_code_string, status_codes
 
 
 class HTTPException(Exception):
-    """A Exception which says, what status-code and what message should be displayed
+    """A Exception which says, what status-code and what message should be displayed.
+
+    Args:
+        code (int | str): The status-code of this Exception
+        message (str, optional): The message of the error.
+        exc_info (optional): sys.exc_info() if raised because of another exception.
+        headers (list(tuple), optional): specific headers for this exception
     """
 
     def __init__(self, code, message=None, exc_info=None, headers=[]):
-        """The cunstructor of HTTPException
-
-        Args:
-            code (int | str): The status-code of this Exception
-            message (str, optional): The message of the error.
-            exc_info (optional): sys.exc_info() if raised because of an other exception.
-            headers (list(tuple), optional): specific headers for this exception
-        """
         Exception.__init__(self)
         self.code = code
         self.message = message
@@ -32,20 +30,18 @@ class HTTPException(Exception):
 
 
 class ErrorHandler(metaclass=ABCMeta):
-    """A WSGI-app which executes another WSGI-App and handles exceptions, if they occure.
+    """A WSGI-app which executes another WSGI-App and handles exceptions, if they occur.
 
-    If the exception is no HTTPException, a HTTPException with the code 500, the message
-    `'A server error occurred. Please contact an administrator.'` and the exc_info will be taken.
+    If the exception is no HTTPException, an HTTPException with the code 500, the message
+    :code:`'A server error occurred. Please contact an administrator.'` and the exc_info will be taken.
 
     This is an abstract class. The handle method needs to be overwritten.
+
+    Args:
+        app: The WSGI-app, which is called by the ErrorHandler
     """
 
     def __init__(self, app):
-        """The cunstructor of ErrorHandler
-
-        Args:
-            app: The WSGI-app, which is called by the ErrorHandler
-        """
         self.app = app
 
     def __call__(self, environ, start_response):
@@ -71,16 +67,14 @@ class ErrorHandler(metaclass=ABCMeta):
 
 class JSONErrorHandler(ErrorHandler):
     """An ErrorHandler which returns the error in the json-body.
+
+    Args:
+        friendly (bool, optional): If true, the output will be human readable, else (default), the output will be minimal.
+        *args: The args of ErrorHandler
+        *kwargs: The kwargs of ErrorHandler
     """
 
     def __init__(self, *args, friendly=False, **kwargs):
-        """The cunstructor of ErrorHandler
-
-        Args:
-            friendly (bool, optional): If true, the output will be human readable, else (default), the output will be minimal.
-            *args: The args of ErrorHandler
-            *kwargs: The kwargs of ErrorHandler
-        """
         ErrorHandler.__init__(self, *args, **kwargs)
         self.friendly = friendly
 
