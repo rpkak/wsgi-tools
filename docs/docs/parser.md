@@ -1,3 +1,5 @@
+(parser)=
+
 # Parser
 
 API-Reference: {py:meth}`wsgi_tools.parser`
