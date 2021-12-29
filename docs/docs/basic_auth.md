@@ -10,4 +10,4 @@ This includes the WSGI-app {py:meth}`wsgi_tools.basic_auth.BasicAuth`. It first 
 
 To create a {py:meth}`wsgi_tools.basic_auth.BasicAuth` instance you have to specify not only the app, but a function called `is_correct` as well. This will be called with the two args. The first arg is the user as a `str` and the second arg is the password as a `str`. This should return a `True`, if this login information is correct and `False` otherwise.
 
-
+You can access the username of the request using {py:meth}`wsgi_tools.basic_auth.BasicAuth.user`.
