@@ -1,6 +1,9 @@
 version: 2
 
-formats: [all]
+formats:
+  - htmlzip
+  - pdf
+  - epub
 
 python:
   install:
