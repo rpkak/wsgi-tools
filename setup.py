@@ -11,7 +11,7 @@ with open('docs-requirements.txt') as f:
 setup(
     name='wsgi-tools',
     version=__version__,
-    url='https://github.com/rpkak/wsgi-tools',
+    url='http://wsgi-tools.rtfd.io/',
     license='Apache 2.0',
     author='rpkak',
     description='A collection of WSGI packages.',
