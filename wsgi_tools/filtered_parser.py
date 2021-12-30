@@ -19,10 +19,25 @@ If you want the raw bytes content, you can use:
 
 
 """
+from __future__ import annotations
+
 import threading
 from json import JSONDecodeError, loads
+from typing import TYPE_CHECKING
 
 from .error import HTTPException
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
+    from typing import Optional, TypeAlias
+
+    from _typeshed.wsgi import StartResponse, WSGIApplication, WSGIEnvironment
+
+    from .utils import JSONValue
+
+    Filter: TypeAlias = Callable[[JSONValue], tuple[bool, str]]
+    Filter.__doc__ = """A function, which works as filter.
+    """
 
 
 class Int:
@@ -35,11 +50,11 @@ class Int:
         max (int, optional): The maximum value.
     """
 
-    def __init__(self, min=None, max=None):
+    def __init__(self, min: Optional[int] = None, max: Optional[int] = None):
         self.min = min
         self.max = max
 
-    def __call__(self, value):
+    def __call__(self, value: JSONValue) -> tuple[bool, str]:
         if value.__class__ != int:
             return False, 'expected int, found \'%s\' of type %s' % (value, value.__class__.__name__)
         elif self.min is not None and self.min > value:
@@ -60,11 +75,11 @@ class Float:
         max (float, optional): The maximum value.
     """
 
-    def __init__(self, min=None, max=None):
+    def __init__(self, min: Optional[float] = None, max: Optional[float] = None):
         self.min = min
         self.max = max
 
-    def __call__(self, value):
+    def __call__(self, value: JSONValue) -> tuple[bool, str]:
         if value.__class__ != float:
             return False, 'expected float, found \'%s\' of type %s' % (value, value.__class__.__name__)
         elif self.min is not None and self.min > value:
@@ -75,7 +90,7 @@ class Float:
             return True, ''
 
 
-def Boolean(value):
+def Boolean(value: JSONValue) -> tuple[bool, str]:
     """A Filter, which checks if values are booleans.
 
     Boolean is directly a filter.
@@ -83,7 +98,7 @@ def Boolean(value):
     return value.__class__ == bool, 'expected boolean, found \'%s\' of type %s' % (value, value.__class__.__name__)
 
 
-def String(value):
+def String(value: JSONValue) -> tuple[bool, str]:
     """A Filter, which checks if values are strings.
 
     String is directly a filter.
@@ -100,10 +115,10 @@ class List:
         filter: The filter, which filters the contents of the list.
     """
 
-    def __init__(self, filter):
+    def __init__(self, filter: Filter):
         self.filter = filter
 
-    def __call__(self, value):
+    def __call__(self, value: JSONValue) -> tuple[bool, str]:
         if value.__class__ == list:
             for i, e in enumerate(value):
                 check, reason = self.filter(e)
@@ -123,10 +138,10 @@ class Options:
         options: The filters, where one of them should match.
     """
 
-    def __init__(self, *options):
+    def __init__(self, *options: Filter):
         self.options = options
 
-    def __call__(self, value):
+    def __call__(self, value: JSONValue) -> tuple[bool, str]:
         reasons = []
         for filter in self.options:
             check, reason = filter(value)
@@ -150,7 +165,7 @@ class Object:
             have more entries than the filter.
     """
 
-    def __init__(self, entries, ignore_more=False):
+    def __init__(self, entries: dict[str, Filter], ignore_more: bool = False):
         self.entries = {}
         for key in entries:
             if isinstance(entries[key], tuple):
@@ -160,7 +175,7 @@ class Object:
 
         self.ignore_more = ignore_more
 
-    def __call__(self, value):
+    def __call__(self, value: JSONValue) -> tuple[bool, str]:
         if value.__class__ == dict:
             value_keys = list(value)
             for key in self.entries:
@@ -189,23 +204,23 @@ class FilteredJSONParser:
     """
 
     @property
-    def raw_content(self):
+    def raw_content(self) -> bytes:
         """bytes: the raw content of the body
         """
         return self.request_data.raw_content
 
     @property
-    def json_content(self):
+    def json_content(self) -> JSONValue:
         """the json content
         """
         return self.request_data.json_content
 
-    def __init__(self, app, filter):
+    def __init__(self, app: WSGIApplication, filter: Filter):
         self.app = app
         self.filter = filter
         self.request_data = threading.local()
 
-    def __call__(self, environ, start_response):
+    def __call__(self, environ: WSGIEnvironment, start_response: StartResponse) -> Iterable[bytes]:
         if 'CONTENT_TYPE' in environ:
             if 'json' in environ['CONTENT_TYPE'].split('/')[1].split('+'):
                 self.request_data.raw_content = environ['wsgi.input'].read(

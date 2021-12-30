@@ -22,10 +22,18 @@ Example:
     ... )
 
 """
+from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
+from typing import TYPE_CHECKING
 
 from wsgi_tools.error import HTTPException
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from typing import Any, Union
+
+    from _typeshed.wsgi import StartResponse, WSGIApplication, WSGIEnvironment
 
 
 class Rule(metaclass=ABCMeta):
@@ -36,7 +44,7 @@ class Rule(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def get_exception(self):
+    def get_exception(self) -> HTTPException:
         """If no route matches this rule, an exception has to be thrown.
 
         Returns:
@@ -45,7 +53,7 @@ class Rule(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def check(self, environ, value):
+    def check(self, environ: WSGIEnvironment, value) -> bool:
         """The Method, which controls, whether a request and a route are matching this rule.
 
         Args:
@@ -88,7 +96,7 @@ class PathRule(Rule):
     def __init__(self):
         self.args = []
 
-    def check(self, environ, value):
+    def check(self, environ: WSGIEnvironment, value: Union[tuple, list]) -> bool:
         args = []
         string = True
         path = environ['PATH_INFO']
@@ -122,7 +130,7 @@ class PathRule(Rule):
             self.args = args
             return True
 
-    def get_exception(self):
+    def get_exception(self) -> HTTPException:
         return HTTPException(404, message='Path not found')
 
 
@@ -136,10 +144,10 @@ class MethodRule(Rule):
         You can use the constant :py:meth:`METHOD_RULE`, because this rule does not have any attributes.
     """
 
-    def check(self, environ, value):
+    def check(self, environ: WSGIEnvironment, value: str) -> bool:
         return value == environ['REQUEST_METHOD']
 
-    def get_exception(self):
+    def get_exception(self) -> HTTPException:
         return HTTPException(405)
 
 
@@ -172,7 +180,7 @@ class ContentTypeRule(Rule):
         You can use the constant :py:meth:`CONTENT_TYPE_RULE`, because this rule does not have any attributes.
     """
 
-    def check(self, environ, value):
+    def check(self, environ: WSGIEnvironment, value: str) -> bool:
         if environ.get('CONTENT_TYPE') is None:
             return value is None
         elif value is None:
@@ -182,7 +190,7 @@ class ContentTypeRule(Rule):
         else:
             return value in environ.get('CONTENT_TYPE', 'text/plain').split('/')[1].split('+')
 
-    def get_exception(self):
+    def get_exception(self) -> HTTPException:
         return HTTPException(415, message='Unsupported Content-Type')
 
 
@@ -215,11 +223,11 @@ class Router:
             forward to as the value.
     """
 
-    def __init__(self, rules, routes):
+    def __init__(self, rules: list[Rule], routes: dict[tuple, WSGIApplication]):
         self.rules = rules
         self.routes = routes
 
-    def __call__(self, environ, start_response):
+    def __call__(self, environ: WSGIEnvironment, start_response: StartResponse) -> Iterable[bytes]:
         routes = list(self.routes)
         for i, rule in enumerate(self.rules):
             routes = [route for route in routes if rule.check(

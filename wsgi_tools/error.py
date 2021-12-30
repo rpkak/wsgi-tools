@@ -3,12 +3,22 @@
 This is required by many other modules of this package.
 """
 
+from __future__ import annotations
+
 from abc import ABCMeta, abstractmethod
 from json import dumps
 from sys import exc_info
 from traceback import print_exc
+from typing import TYPE_CHECKING
 
 from .utils import get_status_code_string, status_codes
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from sys import _OptExcInfo
+    from typing import Optional, Union
+
+    from _typeshed.wsgi import StartResponse, WSGIApplication, WSGIEnvironment
 
 
 class HTTPException(Exception):
@@ -21,7 +31,7 @@ class HTTPException(Exception):
         headers (list(tuple), optional): specific headers for this exception
     """
 
-    def __init__(self, code, message=None, exc_info=None, headers=[]):
+    def __init__(self, code: Union[int, str], message: Optional[str] = None, exc_info: Optional[_OptExcInfo] = None, headers: list[tuple[str, str]] = []):
         Exception.__init__(self)
         self.code = code
         self.message = message
@@ -41,10 +51,10 @@ class ErrorHandler(metaclass=ABCMeta):
         app: The WSGI-app, which is called by the ErrorHandler
     """
 
-    def __init__(self, app):
+    def __init__(self, app: WSGIApplication):
         self.app = app
 
-    def __call__(self, environ, start_response):
+    def __call__(self, environ: WSGIEnvironment, start_response: StartResponse) -> Iterable[bytes]:
         try:
             return self.app(environ, start_response)
         except BaseException as e:
@@ -59,7 +69,7 @@ class ErrorHandler(metaclass=ABCMeta):
             return body
 
     @abstractmethod
-    def handle(self, e):
+    def handle(self, e: HTTPException) -> tuple[Iterable[bytes], list[tuple[str, str]]]:
         """Abstract methed, which has an exception as an arg and returns a body and a list of headers.
         """
         pass
@@ -74,11 +84,11 @@ class JSONErrorHandler(ErrorHandler):
         *kwargs: The kwargs of ErrorHandler
     """
 
-    def __init__(self, *args, friendly=False, **kwargs):
+    def __init__(self, *args, friendly: bool = False, **kwargs):
         ErrorHandler.__init__(self, *args, **kwargs)
         self.friendly = friendly
 
-    def handle(self, e):
+    def handle(self, e: HTTPException) -> tuple[Iterable[bytes], list[tuple[str, str]]]:
         error = {
             'code': int(e.code[:3]) if isinstance(e.code, str) else e.code,
             'error': e.code[4:] if isinstance(e.code, str) else status_codes[e.code]
@@ -97,7 +107,7 @@ class HTMLErrorHandler(ErrorHandler):
     """An ErrorHandler which returns the error in viewable html format.
     """
 
-    def handle(self, e):
+    def handle(self, e: HTTPException) -> tuple[Iterable[bytes], list[tuple[str, str]]]:
         status_code_bytes = get_status_code_string(e.code).encode('utf-8')
         return ([b'<html><head><title>%s</title></head><body><h1>%s</h1>%s</body></html>' % (
                 status_code_bytes,

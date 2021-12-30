@@ -1,10 +1,19 @@
 """Basic Auth implementation in WSGI.
 """
 
+
+from __future__ import annotations
+
 import threading
 from base64 import b64decode
+from typing import TYPE_CHECKING
 
 from .error import HTTPException
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
+
+    from _typeshed.wsgi import StartResponse, WSGIApplication, WSGIEnvironment
 
 
 class BasicAuth:
@@ -18,18 +27,18 @@ class BasicAuth:
     """
 
     @property
-    def user(self):
+    def user(self) -> str:
         """str: The user which is logged in in this request.
         """
         return self.request_data.user
 
-    def __init__(self, app, is_correct, realm='Access to content'):
+    def __init__(self, app: WSGIApplication, is_correct: Callable[[str, str], bool], realm: str = 'Access to content'):
         self.app = app
         self.is_correct = is_correct
         self.realm = realm
         self.request_data = threading.local()
 
-    def __call__(self, environ, start_response):
+    def __call__(self, environ: WSGIEnvironment, start_response: StartResponse) -> Iterable[bytes]:
         if 'HTTP_AUTHORIZATION' in environ and environ['HTTP_AUTHORIZATION'].startswith('Basic '):
             base64_string = environ['HTTP_AUTHORIZATION'][6:]
             try:

@@ -15,11 +15,21 @@ If you want the raw bytes content, you can use:
     parser.raw_content
 
 """
+from __future__ import annotations
+
 import threading
 import xml.etree.ElementTree as ET
 from json import JSONDecodeError, loads
+from typing import TYPE_CHECKING
 
 from .error import HTTPException
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
+    from _typeshed.wsgi import StartResponse, WSGIApplication, WSGIEnvironment
+
+    from .utils import JSONValue
 
 
 class JSONParser:
@@ -30,22 +40,22 @@ class JSONParser:
     """
 
     @property
-    def raw_content(self):
+    def raw_content(self) -> bytes:
         """bytes: the raw content of the body
         """
         return self.request_data.raw_content
 
     @property
-    def json_content(self):
+    def json_content(self) -> JSONValue:
         """the json content
         """
         return self.request_data.json_content
 
-    def __init__(self, app):
+    def __init__(self, app: WSGIApplication):
         self.app = app
         self.request_data = threading.local()
 
-    def __call__(self, environ, start_response):
+    def __call__(self, environ: WSGIEnvironment, start_response: StartResponse) -> Iterable[bytes]:
         if 'CONTENT_TYPE' in environ:
             if 'json' in environ['CONTENT_TYPE'].split('/')[1].split('+'):
                 self.request_data.raw_content = environ['wsgi.input'].read(
@@ -71,22 +81,22 @@ class XMLParser:
     """
 
     @property
-    def raw_content(self):
+    def raw_content(self) -> bytes:
         """bytes: the raw content of the body
         """
         return self.request_data.raw_content
 
     @property
-    def root_element(self):
+    def root_element(self) -> ET.Element:
         """ET.Element: the root element of the xml element-tree
         """
         return self.request_data.root_element
 
-    def __init__(self, app):
+    def __init__(self, app: WSGIApplication):
         self.app = app
         self.request_data = threading.local()
 
-    def __call__(self, environ, start_response):
+    def __call__(self, environ: WSGIEnvironment, start_response: StartResponse) -> Iterable[bytes]:
         if 'CONTENT_TYPE' in environ:
             if 'xml' in environ['CONTENT_TYPE'].split('/')[1].split('+'):
                 self.request_data.raw_content = environ['wsgi.input'].read(

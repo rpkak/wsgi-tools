@@ -25,7 +25,7 @@ def get_options(request: Request):
         return 400, 'No options'
 
 
-def check_access(user, passwd):  # Connection to salting, hashing and a database
+def check_access(user: str, passwd: str):  # Connection to salting, hashing and a database
     return user == 'root' and passwd == 'secret'
 
 
