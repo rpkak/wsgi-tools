@@ -2,6 +2,17 @@
 
 Contains some general constants and functions.
 """
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import TypeAlias, Union
+
+    JSONValue: TypeAlias = Union[dict[str, 'JSONValue'],
+                                 list['JSONValue'], str, int, float, bool, None]
+    JSONValue.__doc__ = """TypeAlias: A type, which represents all possible JSON values.
+    """
 
 status_codes = {
     100: 'Continue',
@@ -72,7 +83,7 @@ The keys are the codes as ints and the values are the strings without numbers.
 """
 
 
-def get_status_code_string(code):
+def get_status_code_string(code: Union[int, str]) -> str:
     """Returns the status as a string.
 
     Args:
