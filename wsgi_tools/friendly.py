@@ -34,7 +34,7 @@ from .utils import get_status_code_string
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
-    from typing import TypeAlias, Union
+    from typing import IO, TypeAlias, Union
 
     from _typeshed.wsgi import StartResponse, WSGIEnvironment
 
@@ -88,6 +88,12 @@ class Request:
         return self.body_bytes.decode('utf-8')
 
 
+def _file_iter(file_like: IO, bufsize: int):
+    while(data := file_like.read(bufsize)):
+        yield data
+    file_like.close()
+
+
 class Response:
     """A response is an object with status, body and headers of the response.
 
@@ -124,6 +130,15 @@ class Response:
             etree_element = etree_element.getroot()
         self.headers['Content-Type'] = 'application/json'
         self.body = ET.tostring(etree_element, encoding='utf-8')
+
+    def file_like_body(self, file_like: IO, bufsize: int = 8192):
+        """
+
+        Args:
+            file_like (file-like object): the file-like object, which can be binary and text, but has to be readable.
+            bufsize (int, default: 8192): the size in bytes each iteration.
+        """
+        self.body = _file_iter(file_like, bufsize)
 
 
 def _make_body(body: Union[str, bytes, bytearray]) -> bytes:
