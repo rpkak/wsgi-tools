@@ -25,12 +25,15 @@ def get_options(request: Request):
         return 400, 'No options'
 
 
-def check_access(user: str, passwd: str):  # Connection to salting, hashing and a database
-    return user == 'root' and passwd == 'secret'
+def index(request: Request):
+    response = Response()
+    response.file_like_body(open('example.py'), 1)
+    return response
 
 
 create_app = FriendlyWSGI(create)
 options_app = FriendlyWSGI(get_options)
+index_app = FriendlyWSGI(index)
 
 create_app_parser = FilteredJSONParser(create_app, Object(
     {
@@ -41,6 +44,11 @@ create_app_parser = FilteredJSONParser(create_app, Object(
     }
 ))
 
+
+def check_access(user: str, passwd: str):  # Connection to salting, hashing and a database
+    return user == 'root' and passwd == 'secret'
+
+
 create_app_auth = BasicAuth(create_app_parser, check_access,
                             realm='Ability to create something')
 
@@ -48,7 +56,8 @@ app = Router(
     [path_rule, METHOD_RULE, CONTENT_TYPE_RULE],
     {
         (('/create',), 'POST', 'json'): create_app_auth,
-        (('/', int, '/options'), 'GET', None): options_app
+        (('/', int, '/options'), 'GET', None): options_app,
+        (('/',), 'GET', None): index_app
     }
 )
 
