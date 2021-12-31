@@ -7,26 +7,6 @@ from typing import TYPE_CHECKING
 
 from .utils import get_status_code_string
 
-if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable
-    from typing import IO, TypeAlias, Union
-
-    from _typeshed.wsgi import StartResponse, WSGIEnvironment
-
-    from .utils import JSONValue
-
-    Headers: TypeAlias = Union[list[tuple[str, str]], dict[str, str]]
-    Headers.__doc__ = """A header has to be a list of tuples or a dict.
-    """
-
-    Body: TypeAlias = Union[str, bytes, bytearray,
-                            Iterable[Union[str, bytes, bytearray]]]
-    Body.__doc__ = """A body has to be a string, bytes or bytearray object or an iterable thereof.
-    """
-
-    StatusCode: TypeAlias = Union[str, int]
-    Body.__doc__ = """A status-code has to be a string or an int.
-    """
 
 
 class Request:
