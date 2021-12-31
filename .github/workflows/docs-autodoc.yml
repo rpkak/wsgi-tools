@@ -22,7 +22,7 @@ jobs:
           python -m pip install -U pip wheel
           pip install -r docs-requirements.txt
 
-      - name: linkcheck
+      - name: git status of make api
         working-directory: docs
         run: |
           make api
