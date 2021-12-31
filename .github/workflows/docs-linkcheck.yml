@@ -1,0 +1,20 @@
+name: Link Checker
+
+on:
+  push:
+  schedule:
+    - cron: '0 0 * * *'
+
+defaults:
+  run:
+    working-directory: docs
+
+jobs:
+  link-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: linkcheck
+        run: make linkcheck
