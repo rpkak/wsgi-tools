@@ -26,4 +26,5 @@ jobs:
           pip install tox
 
       - name: Run tox
+        shell: bash
         run: TOXENV="py$(echo "${{ matrix.python }}" | tr -d '.')" tox
