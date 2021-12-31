@@ -1,9 +1,3 @@
-def _file_iter(file_like: IO, bufsize: int):
-    while(data := file_like.read(bufsize)):
-        yield data
-    file_like.close()
-
-
 class Response:
     """A response is an object with status, body and headers of the response.
 
@@ -49,15 +43,6 @@ class Response:
             bufsize (int, default: 8192): the size in bytes each iteration.
         """
         self.body = _file_iter(file_like, bufsize)
-
-
-def _make_body(body: Union[str, bytes, bytearray]) -> bytes:
-    if isinstance(body, str):
-        return body.encode('utf-8')
-    elif isinstance(body, bytearray):
-        return bytes(body)
-    else:
-        return body
 
 
 class FriendlyWSGI:
