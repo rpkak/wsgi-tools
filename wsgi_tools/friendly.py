@@ -1,9 +1,3 @@
-from __future__ import annotations
-
-import xml.etree.ElementTree as ET
-
-
-
 class Request:
     """A request is an object with attributes from the environ.
 
