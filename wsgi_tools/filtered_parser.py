@@ -29,7 +29,7 @@ from .error import HTTPException
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
-    from typing import Optional, TypeAlias
+    from typing import Optional, TypeAlias, Union
 
     from _typeshed.wsgi import StartResponse, WSGIApplication, WSGIEnvironment
 
@@ -40,52 +40,31 @@ if TYPE_CHECKING:
     """
 
 
-class Int:
-    """A filter class, which checks if values are ints and if they are in a specific range.
+class Number:
+    """A filter class, which checks if values are numbers (ints or floats) and if they are in a specific range.
 
-    Int is not directly a filter, but has to be constructed.
+    Number is not directly a filter, but has to be constructed.
 
     Args:
-        min (int, optional): The minimum value.
-        max (int, optional): The maximum value.
+        min (int | float, optional): The minimum value.
+        max (int | float, optional): The maximum value.
+        require_int (bool): If False (default) floats are allowed, if True they are not.
     """
 
-    def __init__(self, min: Optional[int] = None, max: Optional[int] = None):
+    def __init__(self, min: Optional[Union[int, float]] = None, max: Optional[Union[int, float]] = None, require_int: bool = False):
         self.min = min
         self.max = max
+        self.require_int = require_int
 
     def __call__(self, value: JSONValue) -> tuple[bool, str]:
-        if value.__class__ != int:
+        if self.require_int and value.__class__ != int:
             return False, 'expected int, found \'%s\' of type %s' % (value, value.__class__.__name__)
+        elif value.__class__ != float and value.__class__ != int:
+            return False, 'expected number, found \'%s\' of type %s' % (value, value.__class__.__name__)
         elif self.min is not None and self.min > value:
-            return False, 'expected int bigger than %s, found %s' % (self.min, value)
+            return False, 'expected number bigger than %s, found %s' % (self.min, value)
         elif self.max is not None and self.max < value:
-            return False, 'expected int smaler than %s, found %s' % (self.min, value)
-        else:
-            return True, ''
-
-
-class Float:
-    """A filter class, which checks if values are floats and if they are in a specific range.
-
-    Float is not directly a filter, but has to be constructed.
-
-    Args:
-        min (float, optional): The minimum value.
-        max (float, optional): The maximum value.
-    """
-
-    def __init__(self, min: Optional[float] = None, max: Optional[float] = None):
-        self.min = min
-        self.max = max
-
-    def __call__(self, value: JSONValue) -> tuple[bool, str]:
-        if value.__class__ != float:
-            return False, 'expected float, found \'%s\' of type %s' % (value, value.__class__.__name__)
-        elif self.min is not None and self.min > value:
-            return False, 'expected float bigger than %s, found %s' % (self.min, value)
-        elif self.max is not None and self.max < value:
-            return False, 'expected float smaler than %s, found %s' % (self.min, value)
+            return False, 'expected number smaler than %s, found %s' % (self.min, value)
         else:
             return True, ''
 
@@ -106,7 +85,7 @@ def String(value: JSONValue) -> tuple[bool, str]:
     return value.__class__ == str, 'expected string, found \'%s\' of type %s' % (value, value.__class__.__name__)
 
 
-class List:
+class Array:
     """A filter class, which checks if values are lists and if their content is correct.
 
     List is not directly a filter, but has to be constructed.
@@ -193,6 +172,14 @@ class Object:
                 return False, 'unsupported key \'%s\'' % value_keys[0]
         else:
             return False, 'expected object, found \'%s\' of type %s' % (value, value.__class__.__name__)
+
+
+def Null(value: JSONValue) -> tuple[bool, str]:
+    """A Filter, which checks if values equals null.
+
+    Null is directly a filter.
+    """
+    return value == None, 'expected null, found \'%s\' of type %s' % (value, value.__class__.__name__)
 
 
 class FilteredJSONParser:
