@@ -26,3 +26,4 @@ Examples:
 from __future__ import annotations
 
 import xml.etree.ElementTree as ET
+from functools import cached_property
