@@ -1,11 +1,18 @@
+import os
+import sys
+
 from setuptools import find_packages, setup
 
-from wsgi_tools import __version__
+directory = os.path.abspath(os.path.dirname(__file__))
 
-with open('README.md') as f:
+sys.path.insert(0, directory)
+
+from wsgi_tools import __version__  # noqa: E402
+
+with open(os.path.join(directory, 'README.md')) as f:
     long_description = f.read()
 
-with open('docs-requirements.txt') as f:
+with open(os.path.join(directory, 'docs-requirements.txt')) as f:
     docs_requirements = f.readlines()
 
 setup(

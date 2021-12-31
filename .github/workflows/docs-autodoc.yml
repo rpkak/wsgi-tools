@@ -3,7 +3,6 @@ name: Autodoc
 on:
   push:
 
-
 jobs:
   link-check:
     runs-on: ubuntu-latest
