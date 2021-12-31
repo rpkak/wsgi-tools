@@ -179,7 +179,7 @@ def Null(value: JSONValue) -> tuple[bool, str]:
 
     Null is directly a filter.
     """
-    return value == None, 'expected null, found \'%s\' of type %s' % (value, value.__class__.__name__)
+    return value is None, 'expected null, found \'%s\' of type %s' % (value, value.__class__.__name__)
 
 
 class FilteredJSONParser:

@@ -14,12 +14,12 @@ Examples:
     ...         'id': 0
     ...     })
     ...     return response
-    ... 
+    ...
     >>> app0 = FriendlyWSGI(foo)
     >>>
     >>> def bar(request):
     ...     return 200, request.body_bytes
-    ... 
+    ...
     >>> app1 = FriendlyWSGI(bar)
 """
 
