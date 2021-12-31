@@ -1,6 +1,6 @@
 from wsgi_tools.basic_auth import BasicAuth
 from wsgi_tools.error import JSONErrorHandler
-from wsgi_tools.filtered_parser import (FilteredJSONParser, Float, Int, Object,
+from wsgi_tools.filtered_parser import (FilteredJSONParser, Number, Object,
                                         Options, String)
 from wsgi_tools.friendly import FriendlyWSGI, Request, Response
 from wsgi_tools.routing import CONTENT_TYPE_RULE, METHOD_RULE, PathRule, Router
@@ -27,7 +27,7 @@ def get_options(request: Request):
 
 def index(request: Request):
     response = Response()
-    response.file_like_body(open('example.py'), 1)
+    response.file_like_body(open('example.py'))
     return response
 
 
@@ -37,8 +37,8 @@ index_app = FriendlyWSGI(index)
 
 create_app_parser = FilteredJSONParser(create_app, Object(
     {
-        # Either int or float bigger than 0
-        'id': Options(Int(min=0), Float(min=0)),
+        # Int bigger than 0
+        'id': Number(min=0, require_int=True),
         # the True in this tuple says that this arg is optional
         'description': (String, True)
     }

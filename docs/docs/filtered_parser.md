@@ -8,15 +8,15 @@ What json-strings to accept is configured in filters.
 
 A filter is a callable, which has the value to control as an arg and returns a tuple of the boolean, which tells you if this value is allowed and the reason as a string. If the value is allowed, the reason is not relevant and can be an empty string or `None`.
 
-There are the premade filters {py:meth}`wsgi_tools.filtered_parser.Int`, {py:meth}`wsgi_tools.filtered_parser.Float`, {py:meth}`wsgi_tools.filtered_parser.Boolean`, {py:meth}`wsgi_tools.filtered_parser.Object`, {py:meth}`wsgi_tools.filtered_parser.String`, {py:meth}`wsgi_tools.filtered_parser.Options` and {py:meth}`wsgi_tools.filtered_parser.List`.
+There are the premade filters {py:meth}`wsgi_tools.filtered_parser.Number`, {py:meth}`wsgi_tools.filtered_parser.Boolean`, {py:meth}`wsgi_tools.filtered_parser.Object`, {py:meth}`wsgi_tools.filtered_parser.String`, {py:meth}`wsgi_tools.filtered_parser.Options`, {py:meth}`wsgi_tools.filtered_parser.Array` and {py:meth}`wsgi_tools.filtered_parser.Null`.
 
-- {py:meth}`wsgi_tools.filtered_parser.Boolean` and {py:meth}`wsgi_tools.filtered_parser.String` are unlike the other premade filters directly filters. They don't have to be construced.
+- {py:meth}`wsgi_tools.filtered_parser.Boolean`, {py:meth}`wsgi_tools.filtered_parser.Null` and {py:meth}`wsgi_tools.filtered_parser.String` are unlike the other premade filters directly filters. They don't have to be construced.
 
-- {py:meth}`wsgi_tools.filtered_parser.Int` and {py:meth}`wsgi_tools.filtered_parser.Float` have the two optional args `min` and `max`.
+- {py:meth}`wsgi_tools.filtered_parser.Number` have the three optional args `min`, `max` and `require_int`.
 
 - {py:meth}`wsgi_tools.filtered_parser.Options` has to be construced with other filters. If one of them allows the value, the {py:meth}`wsgi_tools.filtered_parser.Options` allows the value.
 
-- {py:meth}`wsgi_tools.filtered_parser.List` has to be constructed with another filter. If this filter allows every value in the list, the {py:meth}`wsgi_tools.filtered_parser.List` allows the list.
+- {py:meth}`wsgi_tools.filtered_parser.Array` has to be constructed with another filter. If this filter allows every value in the array, the {py:meth}`wsgi_tools.filtered_parser.Array` allows the array.
 
 - {py:meth}`wsgi_tools.filtered_parser.Object` has to be constructed with a dict of this shape:
 
