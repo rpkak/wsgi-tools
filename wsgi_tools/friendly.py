@@ -89,7 +89,10 @@ class Request:
 
 
 def _file_iter(file_like: IO, bufsize: int):
-    while(data := file_like.read(bufsize)):
+    while True:
+        data = file_like.read(bufsize)
+        if not data:
+            break
         yield data
     file_like.close()
 
