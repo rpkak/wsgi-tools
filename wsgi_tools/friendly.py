@@ -22,3 +22,11 @@ Examples:
     ... 
     >>> app1 = FriendlyWSGI(bar)
 """
+
+if True:
+    from collections.abc import Callable, Iterable
+    from typing import IO, TypeAlias, Union
+
+    from _typeshed.wsgi import StartResponse, WSGIEnvironment
+
+    from .utils import JSONValue
