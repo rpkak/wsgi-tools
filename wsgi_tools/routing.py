@@ -31,7 +31,7 @@ from wsgi_tools.error import HTTPException
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
-    from typing import Any, Union
+    from typing import Union
 
     from _typeshed.wsgi import StartResponse, WSGIApplication, WSGIEnvironment
 

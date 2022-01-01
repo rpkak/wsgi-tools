@@ -1,7 +1,6 @@
 from wsgi_tools.basic_auth import BasicAuth
 from wsgi_tools.error import JSONErrorHandler
-from wsgi_tools.filtered_parser import (FilteredJSONParser, Number, Object,
-                                        Options, String)
+from wsgi_tools.filtered_parser import (FilteredJSONParser, Number, Object, String)
 from wsgi_tools.friendly import FriendlyWSGI, Request, Response
 from wsgi_tools.routing import CONTENT_TYPE_RULE, METHOD_RULE, PathRule, Router
 
