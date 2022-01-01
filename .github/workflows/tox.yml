@@ -6,6 +6,7 @@ on:
 jobs:
   tox:
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
         python: ["3.7", "3.8", "3.9", "3.10"]
