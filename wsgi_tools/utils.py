@@ -7,10 +7,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import TypeAlias, Union
+    from typing import Any, Dict, List, Union
 
-    JSONValue: TypeAlias = Union[dict[str, 'JSONValue'],
-                                 list['JSONValue'], str, int, float, bool, None]
+    # https://github.com/python/mypy/issues/731
+    # JSONValue: TypeAlias = Union[Dict[str, 'JSONValue'],
+    #                              List['JSONValue'], str, int, float, bool, None]
+
+    _AnyJSONValue = Union[Dict[str, Any], List[Any], str, int, float, bool, None]
+    JSONValue = Union[Dict[str, _AnyJSONValue],
+                      List[_AnyJSONValue], str, int, float, bool, None]
+    del _AnyJSONValue
     JSONValue.__doc__ = """TypeAlias: A type, which represents all possible JSON values.
     """
 
@@ -98,7 +104,7 @@ def get_status_code_string(code: Union[int, str]) -> str:
         >>> get_status_code_string('200 foo')
         '200 foo'
     """
-    if code in status_codes:
+    if isinstance(code, int):
         return '%s %s' % (code, status_codes[code])
     else:
         return code

@@ -1,0 +1,8 @@
+{
+    "python.linting.mypyEnabled": true,
+    "python.linting.mypyArgs": [
+        "--config-file=tox.ini",
+        "--show-column-numbers",
+        "--no-pretty"
+    ]
+}

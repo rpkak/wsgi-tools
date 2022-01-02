@@ -29,13 +29,13 @@ from .error import HTTPException
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
-    from typing import Optional, TypeAlias, Union
+    from typing import Dict, Optional, Tuple, Union
 
     from _typeshed.wsgi import StartResponse, WSGIApplication, WSGIEnvironment
 
     from .utils import JSONValue
 
-    Filter: TypeAlias = Callable[[JSONValue], tuple[bool, str]]
+    Filter = Callable[[JSONValue], Tuple[bool, str]]
     Filter.__doc__ = """A function, which works as filter.
     """
 
@@ -56,11 +56,11 @@ class Number:
         self.max = max
         self.require_int = require_int
 
-    def __call__(self, value: JSONValue) -> tuple[bool, str]:
-        if self.require_int and value.__class__ != int:
-            return False, 'expected int, found \'%s\' of type %s' % (value, value.__class__.__name__)
-        elif value.__class__ != float and value.__class__ != int:
-            return False, 'expected number, found \'%s\' of type %s' % (value, value.__class__.__name__)
+    def __call__(self, value: JSONValue) -> Tuple[bool, str]:
+        if self.require_int and type(value) != int:
+            return False, 'expected int, found \'%s\' of type %s' % (value, type(value).__name__)
+        elif type(value) != float and type(value) != int:
+            return False, 'expected number, found \'%s\' of type %s' % (value, type(value).__name__)
         elif self.min is not None and self.min > value:
             return False, 'expected number bigger than %s, found %s' % (self.min, value)
         elif self.max is not None and self.max < value:
@@ -69,20 +69,20 @@ class Number:
             return True, ''
 
 
-def Boolean(value: JSONValue) -> tuple[bool, str]:
+def Boolean(value: JSONValue) -> Tuple[bool, str]:
     """A Filter, which checks if values are booleans.
 
     Boolean is directly a filter.
     """
-    return value.__class__ == bool, 'expected boolean, found \'%s\' of type %s' % (value, value.__class__.__name__)
+    return type(value) == bool, 'expected boolean, found \'%s\' of type %s' % (value, type(value).__name__)
 
 
-def String(value: JSONValue) -> tuple[bool, str]:
+def String(value: JSONValue) -> Tuple[bool, str]:
     """A Filter, which checks if values are strings.
 
     String is directly a filter.
     """
-    return value.__class__ == str, 'expected string, found \'%s\' of type %s' % (value, value.__class__.__name__)
+    return type(value) == str, 'expected string, found \'%s\' of type %s' % (value, type(value).__name__)
 
 
 class Array:
@@ -97,15 +97,15 @@ class Array:
     def __init__(self, filter: Filter):
         self.filter = filter
 
-    def __call__(self, value: JSONValue) -> tuple[bool, str]:
-        if value.__class__ == list:
+    def __call__(self, value: JSONValue) -> Tuple[bool, str]:
+        if type(value) == list:
             for i, e in enumerate(value):
                 check, reason = self.filter(e)
                 if not check:
                     return False, '%s: %s' % (i, reason)
             return True, ''
         else:
-            return False, 'expected list, found \'%s\' of type %s' % (value, value.__class__.__name__)
+            return False, 'expected list, found \'%s\' of type %s' % (value, type(value).__name__)
 
 
 class Options:
@@ -120,7 +120,7 @@ class Options:
     def __init__(self, *options: Filter):
         self.options = options
 
-    def __call__(self, value: JSONValue) -> tuple[bool, str]:
+    def __call__(self, value: JSONValue) -> Tuple[bool, str]:
         reasons = []
         for filter in self.options:
             check, reason = filter(value)
@@ -144,18 +144,18 @@ class Object:
             have more entries than the filter.
     """
 
-    def __init__(self, entries: dict[str, Filter], ignore_more: bool = False):
-        self.entries = {}
-        for key in entries:
-            if isinstance(entries[key], tuple):
-                self.entries[key] = entries[key]
+    def __init__(self, entries: Dict[str, Union[Filter, Tuple[Filter, bool]]], ignore_more: bool = False):
+        self.entries: Dict[str, Tuple[Filter, bool]] = {}
+        for key, value in entries.items():
+            if isinstance(value, tuple):
+                self.entries[key] = value
             else:
-                self.entries[key] = (entries[key], False)
+                self.entries[key] = (value, False)
 
         self.ignore_more = ignore_more
 
-    def __call__(self, value: JSONValue) -> tuple[bool, str]:
-        if value.__class__ == dict:
+    def __call__(self, value: JSONValue) -> Tuple[bool, str]:
+        if type(value) == dict:
             value_keys = list(value)
             for key in self.entries:
                 filter, optional = self.entries[key]
@@ -171,15 +171,20 @@ class Object:
             else:
                 return False, 'unsupported key \'%s\'' % value_keys[0]
         else:
-            return False, 'expected object, found \'%s\' of type %s' % (value, value.__class__.__name__)
+            return False, 'expected object, found \'%s\' of type %s' % (value, type(value).__name__)
 
 
-def Null(value: JSONValue) -> tuple[bool, str]:
+def Null(value: JSONValue) -> Tuple[bool, str]:
     """A Filter, which checks if values equals null.
 
     Null is directly a filter.
     """
-    return value == None, 'expected null, found \'%s\' of type %s' % (value, value.__class__.__name__)
+    return value is None, 'expected null, found \'%s\' of type %s' % (value, type(value).__name__)
+
+
+class _RequestData(threading.local):
+    raw_content: bytes
+    json_content: JSONValue
 
 
 class FilteredJSONParser:
@@ -205,7 +210,7 @@ class FilteredJSONParser:
     def __init__(self, app: WSGIApplication, filter: Filter):
         self.app = app
         self.filter = filter
-        self.request_data = threading.local()
+        self.request_data = _RequestData()
 
     def __call__(self, environ: WSGIEnvironment, start_response: StartResponse) -> Iterable[bytes]:
         if 'CONTENT_TYPE' in environ:

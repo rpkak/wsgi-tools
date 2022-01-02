@@ -1,14 +1,16 @@
+from typing import Tuple
+
 from wsgi_tools.basic_auth import BasicAuth
 from wsgi_tools.error import JSONErrorHandler
 from wsgi_tools.filtered_parser import (FilteredJSONParser, Number, Object,
-                                        Options, String)
+                                        String)
 from wsgi_tools.friendly import FriendlyWSGI, Request, Response
 from wsgi_tools.routing import CONTENT_TYPE_RULE, METHOD_RULE, PathRule, Router
 
 path_rule = PathRule()
 
 
-def create(request: Request):
+def create(request: Request) -> Response:
     print(create_app_parser.json_content)
     response = Response(201)
     response.json_body({
@@ -18,14 +20,14 @@ def create(request: Request):
     return response
 
 
-def get_options(request: Request):
+def get_options(request: Request) -> Tuple[int, str]:
     if path_rule.args[0] == 0:
         return 200, 'some options'
     else:
         return 400, 'No options'
 
 
-def index(request: Request):
+def index(request: Request) -> Response:
     response = Response()
     response.file_like_body(open('example.py'))
     return response
@@ -45,14 +47,14 @@ create_app_parser = FilteredJSONParser(create_app, Object(
 ))
 
 
-def check_access(user: str, passwd: str):  # Connection to salting, hashing and a database
+def check_access(user: str, passwd: str) -> bool:  # Connection to salting, hashing and a database
     return user == 'root' and passwd == 'secret'
 
 
 create_app_auth = BasicAuth(create_app_parser, check_access,
                             realm='Ability to create something')
 
-app = Router(
+router_app = Router(
     [path_rule, METHOD_RULE, CONTENT_TYPE_RULE],
     {
         (('/create',), 'POST', 'json'): create_app_auth,
@@ -61,4 +63,4 @@ app = Router(
     }
 )
 
-app = JSONErrorHandler(app)
+app = JSONErrorHandler(router_app)

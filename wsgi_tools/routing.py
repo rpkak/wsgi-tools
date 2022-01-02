@@ -30,8 +30,8 @@ from typing import TYPE_CHECKING
 from wsgi_tools.error import HTTPException
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
-    from typing import Any, Union
+    from collections.abc import Iterable, Sequence, Callable
+    from typing import Any, Dict, List, Tuple, Union
 
     from _typeshed.wsgi import StartResponse, WSGIApplication, WSGIEnvironment
 
@@ -53,7 +53,7 @@ class Rule(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def check(self, environ: WSGIEnvironment, value) -> bool:
+    def check(self, environ: WSGIEnvironment, value: Any) -> bool:
         """The Method, which controls, whether a request and a route are matching this rule.
 
         Args:
@@ -96,14 +96,14 @@ class PathRule(Rule):
     def __init__(self):
         self.args = []
 
-    def check(self, environ: WSGIEnvironment, value: Union[tuple, list]) -> bool:
+    def check(self, environ: WSGIEnvironment, value: Sequence[Union[str, Callable[[str], Any]]]) -> bool:
         args = []
         string = True
         path = environ['PATH_INFO']
         for i in range(len(value)):
             if string:
-                if path[:len(value[i])] == value[i]:
-                    path = path[len(value[i]):]
+                if path[:len(value[i])] == value[i]:  # type: ignore
+                    path = path[len(value[i]):]  # type: ignore
                 else:
                     return False
             else:
@@ -119,7 +119,7 @@ class PathRule(Rule):
                         path = path[content_end:]
                 func = value[i]
                 try:
-                    arg = func(content)
+                    arg = func(content)  # type: ignore
                 except ValueError:
                     return False
                 args.append(arg)
@@ -223,7 +223,7 @@ class Router:
             forward to as the value.
     """
 
-    def __init__(self, rules: list[Rule], routes: dict[tuple, WSGIApplication]):
+    def __init__(self, rules: List[Rule], routes: Dict[Tuple[Any, ...], WSGIApplication]):
         self.rules = rules
         self.routes = routes
 

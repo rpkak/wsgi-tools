@@ -23,7 +23,7 @@ author = 'rpkak'
 
 # The full version, including alpha/beta/rc tags
 
-from wsgi_tools import __version__
+from wsgi_tools import __version__  # noqa: E402
 
 release = __version__
 
