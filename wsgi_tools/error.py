@@ -16,7 +16,7 @@ from .utils import get_status_code_string, status_codes
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from sys import _OptExcInfo
-    from typing import Optional, Union
+    from typing import List, Optional, Tuple, Union
 
     from _typeshed.wsgi import StartResponse, WSGIApplication, WSGIEnvironment
 
@@ -31,7 +31,7 @@ class HTTPException(Exception):
         headers (list(tuple), optional): specific headers for this exception
     """
 
-    def __init__(self, code: Union[int, str], message: Optional[str] = None, exc_info: Optional[_OptExcInfo] = None, headers: list[tuple[str, str]] = []):
+    def __init__(self, code: Union[int, str], message: Optional[str] = None, exc_info: Optional[_OptExcInfo] = None, headers: List[Tuple[str, str]] = []):
         Exception.__init__(self)
         self.code = code
         self.message = message
@@ -69,7 +69,7 @@ class ErrorHandler(metaclass=ABCMeta):
             return body
 
     @abstractmethod
-    def handle(self, e: HTTPException) -> tuple[Iterable[bytes], list[tuple[str, str]]]:
+    def handle(self, e: HTTPException) -> Tuple[Iterable[bytes], List[Tuple[str, str]]]:
         """Abstract methed, which has an exception as an arg and returns a body and a list of headers.
         """
         pass
@@ -84,11 +84,11 @@ class JSONErrorHandler(ErrorHandler):
         *kwargs: The kwargs of ErrorHandler
     """
 
-    def __init__(self, *args, friendly: bool = False, **kwargs):
-        ErrorHandler.__init__(self, *args, **kwargs)
+    def __init__(self, app: WSGIApplication, friendly: bool = False):
+        ErrorHandler.__init__(self, app)
         self.friendly = friendly
 
-    def handle(self, e: HTTPException) -> tuple[Iterable[bytes], list[tuple[str, str]]]:
+    def handle(self, e: HTTPException) -> Tuple[Iterable[bytes], List[Tuple[str, str]]]:
         error = {
             'code': int(e.code[:3]) if isinstance(e.code, str) else e.code,
             'error': e.code[4:] if isinstance(e.code, str) else status_codes[e.code]
@@ -107,7 +107,7 @@ class HTMLErrorHandler(ErrorHandler):
     """An ErrorHandler which returns the error in viewable html format.
     """
 
-    def handle(self, e: HTTPException) -> tuple[Iterable[bytes], list[tuple[str, str]]]:
+    def handle(self, e: HTTPException) -> Tuple[Iterable[bytes], List[Tuple[str, str]]]:
         status_code_bytes = get_status_code_string(e.code).encode('utf-8')
         return ([b'<html><head><title>%s</title></head><body><h1>%s</h1>%s</body></html>' % (
                 status_code_bytes,

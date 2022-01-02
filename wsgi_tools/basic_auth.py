@@ -16,6 +16,10 @@ if TYPE_CHECKING:
     from _typeshed.wsgi import StartResponse, WSGIApplication, WSGIEnvironment
 
 
+class _RequestData(threading.local):
+    user: str
+
+
 class BasicAuth:
     """A WSGI-app which asks you to authenticate if you are not and forwards the request otherwise.
 
@@ -36,7 +40,7 @@ class BasicAuth:
         self.app = app
         self.is_correct = is_correct
         self.realm = realm
-        self.request_data = threading.local()
+        self.request_data = _RequestData()
 
     def __call__(self, environ: WSGIEnvironment, start_response: StartResponse) -> Iterable[bytes]:
         if 'HTTP_AUTHORIZATION' in environ and environ['HTTP_AUTHORIZATION'].startswith('Basic '):

@@ -32,6 +32,11 @@ if TYPE_CHECKING:
     from .utils import JSONValue
 
 
+class _JSONParserRequestData(threading.local):
+    raw_content: bytes
+    json_content: JSONValue
+
+
 class JSONParser:
     """A WSIG app, which parses json from the content.
 
@@ -53,7 +58,7 @@ class JSONParser:
 
     def __init__(self, app: WSGIApplication):
         self.app = app
-        self.request_data = threading.local()
+        self.request_data = _JSONParserRequestData()
 
     def __call__(self, environ: WSGIEnvironment, start_response: StartResponse) -> Iterable[bytes]:
         if 'CONTENT_TYPE' in environ:
@@ -71,6 +76,11 @@ class JSONParser:
                     415, message='Only json content is allowed.')
         else:
             raise HTTPException(400, message='Body required')
+
+
+class _XMLParserRequestData(threading.local):
+    raw_content: bytes
+    root_element: ET.Element
 
 
 class XMLParser:
@@ -94,7 +104,7 @@ class XMLParser:
 
     def __init__(self, app: WSGIApplication):
         self.app = app
-        self.request_data = threading.local()
+        self.request_data = _XMLParserRequestData()
 
     def __call__(self, environ: WSGIEnvironment, start_response: StartResponse) -> Iterable[bytes]:
         if 'CONTENT_TYPE' in environ:
